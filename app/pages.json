@@ -1,0 +1,34 @@
+{
+  "pages": [
+    { "path": "pages/home/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/records/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/wiki/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/profile/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/auth/login", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/auth/register", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/auth/forgot", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/task/create", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/pet/profile", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/pet/manage", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/pet/add", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/messages/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/messages/detail", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/wiki/list", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/wiki/detail", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/wiki/comments", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/wiki/guide", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/profile/info", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/profile/family", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/profile/invite", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/profile/requests", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/profile/settings", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/profile/help", "style": { "navigationStyle": "custom" } }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#fffdf9",
+    "backgroundColor": "#f6f4f1",
+    "backgroundTextStyle": "dark"
+  },
+  "uniIdRouter": {}
+}
