@@ -2,9 +2,9 @@
   <view class="page home-page">
     <view class="home-top">
       <view class="brand-group">
-        <text class="brand">爪娃</text>
+        <text class="brand">宠迹管家</text>
         <button class="brand-message" aria-label="消息提醒" @tap="openMessages">
-          <AppIcon name="bell" size="28rpx" />
+          <AppIcon name="bell" size="36rpx" />
           <text class="dot" />
         </button>
       </view>
@@ -15,7 +15,7 @@
         <swiper-item v-for="pet in pets" :key="pet.id">
           <view class="pet-hero" :class="{ peach: pet.id === 2 }">
             <view class="home-actions">
-              <button class="round-action" aria-label="宠物管理" @tap="openPetManage"><AppIcon name="paw" size="32rpx" /></button>
+              <button class="round-action" aria-label="宠物管理" @tap="openPetManage"><AppIcon name="paw" size="36rpx" /></button>
             </view>
             <button
               class="pet-avatar"
@@ -114,12 +114,12 @@
             <text class="muted">{{ task.note }}</text>
           </view>
           <view class="task-check" :class="{ done: task.done }">
-            <AppIcon v-if="task.done" name="check-light" size="25rpx" />
+            <AppIcon v-if="task.done" name="task-check-clean" size="25rpx" />
           </view>
         </button>
       </view>
 
-      <button class="add-task" @tap="openCreateTask"><AppIcon name="plus" size="27rpx" /><text>新增宠物任务</text></button>
+      <button class="add-task" @tap="openCreateTask"><AppIcon name="task-plus-clean" size="27rpx" /><text>新增宠物任务</text></button>
     </view>
 
     <AppBottomNav active="home" />
@@ -367,27 +367,30 @@ export default {
 }
 
 .brand-group {
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 14rpx;
+  justify-content: center;
 }
 
 .brand {
   color: #c7784f;
-  font-size: 28rpx;
+  font-size: 36rpx;
   font-weight: 700;
   letter-spacing: 3rpx;
 }
 
 .brand-message {
-  position: relative;
-  width: 54rpx;
-  height: 54rpx;
+  position: absolute;
+  left: 0;
+  width: 64rpx;
+  height: 64rpx;
   padding: 0;
-  border: 1rpx solid #eadfce;
-  border-radius: 18rpx;
+  border: 0;
+  border-radius: 0;
   color: #a6734d;
-  background: #fffaf2;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -406,13 +409,20 @@ export default {
   position: relative;
   width: 64rpx;
   height: 64rpx;
-  border: 1rpx solid var(--line);
-  border-radius: 20rpx;
-  background: rgba(255,255,255,.7);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #a6734d;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 29rpx;
+}
+
+.brand-message::after,
+.round-action::after {
+  border: 0;
 }
 
 .dot {

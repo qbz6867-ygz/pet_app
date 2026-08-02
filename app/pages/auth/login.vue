@@ -9,7 +9,7 @@
     </button>
 
     <view class="login-hero">
-      <text class="hero-kicker">宠物健康助手</text>
+      <text class="hero-kicker">宠迹管家</text>
       <text class="hero-title">陪它健康地长大</text>
       <text class="hero-desc">记录日常状态，也珍藏每一天的陪伴</text>
       <view class="hero-features">
@@ -19,6 +19,7 @@
         <view class="feature-dot" />
         <text>成长陪伴</text>
       </view>
+      <image class="hero-logo" src="/static/brand/app-icon.png" mode="aspectFit" />
     </view>
 
     <view class="login-bottom">
@@ -128,6 +129,7 @@ export default {
 .decor-side { width: 180rpx; height: 180rpx; top: 48%; left: -132rpx; border-radius: 50%; background: rgba(245,226,191,.22); }
 .back-button { width: 68rpx; height: 68rpx; position: relative; z-index: 1; border: 1rpx solid #e7d7c0; border-radius: 22rpx; color: #9a704d; background: rgba(255,251,245,.9); display: flex; align-items: center; justify-content: center; box-shadow: 0 8rpx 24rpx rgba(112,76,43,.05); }
 .login-hero { margin-top: 108rpx; position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.hero-logo { width: 184rpx; height: 184rpx; margin-top: 30rpx; border-radius: 44rpx; }
 .hero-kicker { color: #bb8251; font-size: 19rpx; letter-spacing: 7rpx; }
 .hero-title { margin-top: 25rpx; color: #594538; font-size: 48rpx; font-weight: 500; letter-spacing: 2rpx; }
 .hero-desc { margin-top: 16rpx; color: #9c8a7c; font-size: 21rpx; font-weight: 300; }

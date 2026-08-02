@@ -407,11 +407,14 @@ export default {
   border-radius: 24rpx;
   background: #fbf6ed;
   flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .composer-field textarea {
   width: 100%;
   height: 48rpx;
+  padding: 0;
   color: var(--ink);
   font-size: 22rpx;
   line-height: 48rpx;
@@ -423,12 +426,17 @@ export default {
 
 .submit-review {
   width: 104rpx;
-  height: 70rpx;
+  height: 74rpx;
+  padding: 0;
   border-radius: 22rpx;
   color: #ffffff;
   background: var(--brand-dark);
   font-size: 23rpx;
   font-weight: 600;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .submit-review.disabled {

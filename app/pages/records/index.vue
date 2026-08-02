@@ -38,12 +38,10 @@
     <view class="pet-date-row">
       <view class="month-row">
         <button aria-label="上一周" @tap="changeWeek(-1)"><AppIcon name="chevron-left" size="30rpx" /></button>
-        <view class="month-label">
+        <button class="month-label" aria-label="选择日期" @tap="calendarOpen = true">
           <text>{{ monthLabel }}</text>
-          <button class="calendar-action" aria-label="选择日期" @tap="calendarOpen = true">
-            <AppIcon name="calendar" size="28rpx" />
-          </button>
-        </view>
+          <AppIcon name="calendar" size="28rpx" />
+        </button>
         <button aria-label="下一周" @tap="changeWeek(1)"><AppIcon name="chevron-right" size="30rpx" /></button>
       </view>
     </view>
@@ -565,30 +563,37 @@ export default {
   font-size: 18rpx;
 }
 
-.calendar-action {
-  width: 52rpx;
-  height: 52rpx;
-  border: 0;
-  border-radius: 50%;
-  background: #f8ecd8;
-  color: var(--brand-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .month-row {
+  height: 52rpx;
   display: grid;
   grid-template-columns: 70rpx 1fr 70rpx;
   align-items: center;
   font-weight: 600;
 }
 
+.month-row > button {
+  position: relative;
+  z-index: 1;
+  width: 80rpx;
+  height: 80rpx;
+  justify-self: center;
+}
+
 .month-label {
+  width: max-content;
+  height: 52rpx;
+  padding: 0 10rpx;
+  justify-self: center;
+  color: inherit;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 22rpx;
+}
+
+.month-label::after {
+  border: 0;
 }
 
 .month-row button {

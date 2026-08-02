@@ -16,28 +16,16 @@
       <view class="account-accent" />
     </button>
 
-    <view v-if="loggedIn" class="family card">
+    <view class="family card" @tap="openFamily">
       <view class="row-between">
         <text class="section-title">家庭组</text>
-        <button class="manage-link" @tap="openFamily"><text>管理</text><AppIcon name="chevron-right" size="20rpx" /></button>
+        <button class="manage-link" @tap.stop="openFamily"><text>管理</text><AppIcon name="chevron-right" size="20rpx" /></button>
       </view>
-      <view class="family-avatars">
+      <view v-if="loggedIn" class="family-avatars">
         <text v-for="member in ['林','陈','周']" :key="member">{{ member }}</text>
         <view class="add"><AppIcon name="plus" size="24rpx" /></view>
       </view>
-      <text class="family-meta">3 位家庭成员 · 共同照顾 2 只宠物</text>
-    </view>
-
-    <view v-else class="login-prompt card">
-      <view class="login-prompt-icon"><AppIcon name="paw" size="36rpx" /></view>
-      <view>
-        <text class="login-prompt-title">保存每一份健康记录</text>
-        <text class="login-prompt-desc">登录后可同步宠物资料、打卡记录和家庭任务。</text>
-      </view>
-      <view class="login-actions">
-        <button class="primary-button" @tap="openLogin">立即登录</button>
-        <button class="ghost-button" @tap="openRegister">注册账号</button>
-      </view>
+      <text v-if="loggedIn" class="family-meta">3 位家庭成员 · 共同照顾 2 只宠物</text>
     </view>
 
     <view class="menu-list">
@@ -78,14 +66,25 @@ export default {
   methods: {
     openInfo() { uni.navigateTo({ url: '/pages/profile/info' }) },
     openLogin() { uni.navigateTo({ url: '/pages/auth/login' }) },
-    openRegister() { uni.navigateTo({ url: '/pages/auth/register' }) },
     requireLogin() {
       if (this.loggedIn) return true
       uni.navigateTo({ url: '/pages/auth/login' })
       return false
     },
     openFamily() {
-      if (this.requireLogin()) uni.navigateTo({ url: '/pages/profile/family' })
+      if (this.loggedIn) {
+        uni.navigateTo({ url: '/pages/profile/family' })
+        return
+      }
+      uni.showModal({
+        title: '温馨提示',
+        content: '登录后才能使用家庭组功能',
+        confirmText: '去登录',
+        cancelText: '暂不登录',
+        success: ({ confirm }) => {
+          if (confirm) this.openLogin()
+        }
+      })
     },
     openMessages() {
       if (this.requireLogin()) uni.navigateTo({ url: '/pages/messages/index' })
@@ -203,58 +202,6 @@ export default {
 .family-meta {
   color: var(--muted);
   font-size: 21rpx;
-}
-
-.login-prompt {
-  margin-top: 18rpx;
-  padding: 26rpx;
-  display: grid;
-  grid-template-columns: 64rpx 1fr;
-  align-items: center;
-  gap: 17rpx;
-}
-
-.login-prompt-icon {
-  width: 62rpx;
-  height: 62rpx;
-  border-radius: 20rpx;
-  color: #9b6c46;
-  background: #f7e5c1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.login-prompt > view:nth-child(2) {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5rpx;
-}
-
-.login-prompt-title {
-  color: var(--ink);
-  font-size: 25rpx;
-  font-weight: 600;
-}
-
-.login-prompt-desc {
-  color: var(--muted);
-  font-size: 19rpx;
-  line-height: 1.5;
-}
-
-.login-actions {
-  grid-column: 1 / -1;
-  margin-top: 7rpx;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12rpx;
-}
-
-.login-actions button {
-  min-height: 68rpx;
-  font-size: 23rpx;
 }
 
 .menu-list {
