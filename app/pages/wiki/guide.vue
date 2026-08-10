@@ -36,9 +36,9 @@ export default { components: { AppTopBar }, data() { return { guideSections } } 
   border-radius: 34rpx;
   background: linear-gradient(135deg, #f6d99d, #efc57f);
 }
-.hero-title { display: block; margin: 14rpx 0 8rpx; width: 75%; font-size: 39rpx; font-weight: 600; }
+.hero-title { display: block; margin: 14rpx 0 8rpx; width: 75%; font-size: 40rpx; font-weight: 600; }
 .hero-desc { display: block; width: 76%; color: #806957; font-size: 22rpx; line-height: 1.65; }
-.hero-paw { position: absolute; right: 30rpx; top: 70rpx; font-size: 84rpx; transform: rotate(18deg); }
+.hero-paw { position: absolute; right: 30rpx; top: 70rpx; font-size: 58rpx; transform: rotate(18deg); }
 .guide-content { padding: 6rpx 4rpx; }
 .guide-section { padding: 34rpx 10rpx; border-bottom: 1rpx solid var(--line); }
 .guide-title-row { margin-bottom: 18rpx; display: grid; grid-template-columns: 58rpx 1fr; align-items: center; gap: 12rpx; }

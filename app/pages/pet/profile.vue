@@ -14,7 +14,7 @@
     <view class="card info-card">
       <view class="row-between">
         <view><text class="section-kicker">身份档案</text><text class="section-title">基本资料</text></view>
-        <button class="pill" @tap="editing = !editing">{{ editing ? '完成' : '编辑' }}</button>
+        <button v-if="pet.canEdit" class="pill" @tap="toggleEditing">{{ editing ? '完成' : '编辑' }}</button>
       </view>
       <view class="info-list">
         <label v-for="item in fields" :key="item.key" class="info-row">
@@ -24,7 +24,7 @@
       </view>
     </view>
 
-    <button class="danger-button delete-button" @tap="confirmDelete">删除宠物档案</button>
+    <button v-if="pet.isOwned" class="danger-button delete-button" @tap="confirmDelete">删除宠物档案</button>
 
     <AppConfirmDialog
       :open="deleteConfirmOpen"
@@ -42,13 +42,13 @@
 <script>
 import AppTopBar from '../../components/AppTopBar.vue'
 import AppConfirmDialog from '../../components/AppConfirmDialog.vue'
-import { pets } from '../../common/data.js'
+import { deletePetProfile, getActivePets, updatePetProfile } from '../../common/pets.js'
 
 export default {
   components: { AppTopBar, AppConfirmDialog },
   data() {
     return {
-      pet: pets[0],
+      pet: getActivePets()[0],
       editing: false,
       deleteConfirmOpen: false,
       profile: { name: '旺财', breed: '威尔士柯基犬', gender: '公', birthday: '2024-03-18', weight: '10.8 kg' },
@@ -60,19 +60,60 @@ export default {
     }
   },
   onLoad(options) {
-    const index = Math.max(0, pets.findIndex(item => item.id === Number(options.id || 1)))
-    this.pet = pets[index]
+    const activePets = getActivePets()
+    const index = Math.max(0, activePets.findIndex(item => item.id === Number(options.id || activePets[0].id)))
+    this.pet = activePets[index]
     this.profile.name = this.pet.name
     this.profile.breed = this.pet.type
-    this.profile.gender = this.pet.gender === '女孩' ? '母' : '公'
+    this.profile.gender = ['女孩', '母'].includes(this.pet.gender)
+      ? '母'
+      : ['男孩', '公'].includes(this.pet.gender) ? '公' : '未设置'
+    this.profile.birthday = this.pet.birthday || this.profile.birthday
     this.profile.weight = `${this.pet.weight} kg`
   },
   methods: {
+    toggleEditing() {
+      if (!this.pet.canEdit) {
+        uni.showToast({ title: '仅家庭组管理员可编辑', icon: 'none' })
+        return
+      }
+      if (this.editing) {
+        const updated = updatePetProfile(this.pet.id, {
+          name: this.profile.name.trim(),
+          type: this.profile.breed.trim(),
+          gender: this.profile.gender,
+          birthday: this.profile.birthday,
+          weight: String(this.profile.weight).replace(/\s*kg$/i, '').trim()
+        })
+        if (!updated) {
+          uni.showToast({ title: '无权修改该宠物资料', icon: 'none' })
+          return
+        }
+        this.pet = getActivePets().find(item => item.id === this.pet.id) || this.pet
+        uni.showToast({ title: '宠物资料已保存', icon: 'success' })
+      }
+      this.editing = !this.editing
+    },
     confirmDelete() {
       this.deleteConfirmOpen = true
     },
     deletePet() {
       this.deleteConfirmOpen = false
+      const result = deletePetProfile(this.pet.id)
+      if (!result.success) {
+        uni.showToast({ title: result.reason === 'forbidden' ? '仅档案创建者可删除' : '至少需要保留一只宠物', icon: 'none' })
+        return
+      }
+      uni.showToast({
+        title: '宠物档案已删除',
+        icon: 'success',
+        duration: 1200
+      })
+      setTimeout(() => {
+        const pages = getCurrentPages()
+        if (pages.length > 1) uni.navigateBack()
+        else uni.reLaunch({ url: '/pages/pet/manage' })
+      }, 1200)
     }
   }
 }
@@ -103,7 +144,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 84rpx;
+  font-size: 58rpx;
 }
 
 .profile-avatar image {
@@ -114,7 +155,7 @@ export default {
 .pet-name {
   align-self: end;
   margin: 0 0 8rpx;
-  font-size: 54rpx;
+  font-size: 52rpx;
   font-weight: 600;
 }
 
@@ -150,8 +191,8 @@ export default {
 .info-icon {
   width: 50rpx;
   height: 50rpx;
-  border-radius: 16rpx;
-  background: white;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,7 +205,7 @@ export default {
 }
 
 .info-row .muted {
-  font-size: 19rpx;
+  font-size: 20rpx;
 }
 
 .info-row input {

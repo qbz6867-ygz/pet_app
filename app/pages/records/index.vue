@@ -40,7 +40,7 @@
         <button aria-label="上一周" @tap="changeWeek(-1)"><AppIcon name="chevron-left" size="30rpx" /></button>
         <button class="month-label" aria-label="选择日期" @tap="calendarOpen = true">
           <text>{{ monthLabel }}</text>
-          <AppIcon name="calendar" size="28rpx" />
+          <AppIcon class="month-calendar-icon" name="calendar" size="28rpx" />
         </button>
         <button aria-label="下一周" @tap="changeWeek(1)"><AppIcon name="chevron-right" size="30rpx" /></button>
       </view>
@@ -55,15 +55,42 @@
 
     <view class="health-overview">
       <view class="score-block">
-        <view class="score-ring">
-          <text class="score">{{ currentRecord.score }}</text>
-          <text>健康值</text>
+        <view class="health-status-summary">
+          <view class="score-ring">
+            <text class="score">{{ currentRecord.score }}</text>
+            <text>健康值</text>
+          </view>
+          <view>
+            <text class="section-kicker">今日健康状态</text>
+            <text class="status">状态{{ currentRecord.status }}</text>
+          </view>
         </view>
-        <view>
-          <text class="section-kicker">今日健康状态</text>
-          <text class="status">状态{{ currentRecord.status }}</text>
-          <view class="trend"><text>较上周提升 {{ currentRecord.change }} 分</text><AppIcon name="trend-up" size="22rpx" /></view>
+
+        <view v-if="dailyFortune" class="fortune-panel">
+          <view class="fortune-panel-head">
+            <AppIcon name="paw" size="24rpx" />
+            <text>今日宠签</text>
+            <view class="fortune-checked"><AppIcon name="task-check-clean" size="18rpx" /></view>
+          </view>
+          <view class="fortune-compact-list">
+            <view v-for="item in fortuneDetails" :key="item.label" class="fortune-compact-row">
+              <text>{{ item.label }}</text>
+              <text>{{ item.value }}</text>
+            </view>
+          </view>
         </view>
+
+        <view v-else class="fortune-panel fortune-panel-empty">
+          <button class="fortune-draw-button" @tap="drawDailyFortune">
+            <AppIcon name="paw" size="28rpx" />
+            <text>抽取今日宠签</text>
+          </button>
+          <text class="fortune-empty-tip">每日可抽取一次</text>
+        </view>
+      </view>
+
+      <view class="trend-row">
+        <view class="trend"><text>较上周提升 {{ currentRecord.change }} 分</text><AppIcon name="trend-up" size="22rpx" /></view>
       </view>
 
       <view class="trend-heading row-between">
@@ -123,13 +150,13 @@
 import AppTopBar from '../../components/AppTopBar.vue'
 import AppBottomNav from '../../components/AppBottomNav.vue'
 import AppWheelSheet from '../../components/AppWheelSheet.vue'
-import { pets } from '../../common/data.js'
+import { getActivePets } from '../../common/pets.js'
 
 export default {
   components: { AppTopBar, AppBottomNav, AppWheelSheet },
   data() {
     return {
-      pets,
+      pets: getActivePets(),
       petIndex: 0,
       petPickerOpen: false,
       weekStart: '2026-07-27',
@@ -138,6 +165,7 @@ export default {
       calendarValue: [2, 6, 26],
       chartMetrics: null,
       activeChartIndex: null,
+      dailyFortune: null,
       records: [
         {
           score: 92, status: '优秀', change: 4, chart: [74, 82, 79, 91, 87, 85, 92],
@@ -183,9 +211,20 @@ export default {
         Array.from({ length: 31 }, (_, index) => index + 1)
       ]
     },
-    currentRecord() { return this.records[this.petIndex] },
+    currentRecord() {
+      const pet = this.pets[this.petIndex]
+      return this.records[Math.max(0, Number(pet.id) - 1)] || this.records[0]
+    },
     averageScore() {
       return Math.round(this.currentRecord.chart.reduce((sum, value) => sum + value, 0) / this.currentRecord.chart.length)
+    },
+    fortuneDetails() {
+      if (!this.dailyFortune) return []
+      return [
+        { label: '幸运零食', value: this.dailyFortune.snack },
+        { label: '幸运地点', value: this.dailyFortune.place },
+        { label: '幸运互动', value: this.dailyFortune.interaction }
+      ]
     },
     healthAdvice() {
       const health = Object.fromEntries(this.currentRecord.health.map(item => [item.icon, item.value]))
@@ -228,10 +267,37 @@ export default {
       this.$nextTick(this.drawChart)
     }
   },
+  onShow() {
+    this.pets = getActivePets()
+    this.petIndex = Math.min(this.petIndex, this.pets.length - 1)
+    this.loadDailyFortune()
+  },
   onReady() {
     this.drawChart()
   },
   methods: {
+    loadDailyFortune() {
+      const saved = uni.getStorageSync('dailyPetFortune')
+      this.dailyFortune = saved && saved.date === this.formatDate(new Date())
+        ? {
+            snack: saved.fortune.snack || '冻干鸡肉',
+            place: saved.fortune.place || '有阳光的窗边',
+            interaction: saved.fortune.interaction || '摸下巴'
+          }
+        : null
+    },
+    drawDailyFortune() {
+      if (this.dailyFortune) return
+      this.dailyFortune = {
+        snack: '冻干鸡肉',
+        place: '有阳光的窗边',
+        interaction: '摸下巴'
+      }
+      uni.setStorageSync('dailyPetFortune', {
+        date: this.formatDate(new Date()),
+        fortune: this.dailyFortune
+      })
+    },
     parseDate(value) {
       const [year, month, day] = value.split('-').map(Number)
       return new Date(year, month - 1, day)
@@ -543,14 +609,14 @@ export default {
 }
 
 .pet-popover-name {
-  font-size: 25rpx;
+  font-size: 28rpx;
   font-weight: 600;
 }
 
 .pet-popover-meta {
   overflow: hidden;
   color: var(--muted);
-  font-size: 19rpx;
+  font-size: 20rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -564,9 +630,9 @@ export default {
 }
 
 .month-row {
-  height: 52rpx;
+  min-height: 76rpx;
   display: grid;
-  grid-template-columns: 70rpx 1fr 70rpx;
+  grid-template-columns: 72rpx minmax(0, 1fr) 72rpx;
   align-items: center;
   font-weight: 600;
 }
@@ -574,22 +640,43 @@ export default {
 .month-row > button {
   position: relative;
   z-index: 1;
-  width: 80rpx;
-  height: 80rpx;
+  width: 68rpx;
+  height: 68rpx;
   justify-self: center;
 }
 
-.month-label {
-  width: max-content;
-  height: 52rpx;
-  padding: 0 10rpx;
+.month-row > .month-label {
+  width: auto;
+  min-width: 238rpx;
+  max-width: 100%;
+  height: 68rpx;
+  padding: 0 22rpx;
+  border: 0;
+  border-radius: 0;
   justify-self: center;
   color: inherit;
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 22rpx;
+  gap: 14rpx;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+.month-label text {
+  position: absolute;
+  left: 50%;
+  flex-shrink: 0;
+  font-size: 28rpx;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.month-calendar-icon {
+  position: absolute;
+  left: calc(50% + 88rpx);
 }
 
 .month-label::after {
@@ -604,7 +691,7 @@ export default {
 
 .date-strip {
   min-height: 104rpx;
-  margin-top: 24rpx;
+  margin-top: 16rpx;
   padding: 12rpx;
   border-radius: 28rpx;
   background: #fffaf3;
@@ -626,7 +713,7 @@ export default {
 
 .date-strip button text:last-child {
   color: var(--ink);
-  font-size: 25rpx;
+  font-size: 28rpx;
   font-weight: 600;
 }
 
@@ -641,10 +728,18 @@ export default {
 }
 
 .score-block {
-  min-height: 190rpx;
+  min-height: 210rpx;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 292rpx;
+  align-items: center;
+  gap: 18rpx;
+}
+
+.health-status-summary {
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 32rpx;
+  gap: 18rpx;
 }
 
 .score-ring {
@@ -672,9 +767,99 @@ export default {
 
 .status {
   display: block;
-  margin: 5rpx 0 12rpx;
+  margin-top: 5rpx;
   color: #ad6d3e;
-  font-size: 42rpx;
+  font-size: 40rpx;
+}
+
+.fortune-panel {
+  width: 100%;
+  min-height: 184rpx;
+  padding: 8rpx 0 8rpx 22rpx;
+  border-left: 2rpx solid #efd49e;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+}
+
+.fortune-panel-head {
+  min-height: 38rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  color: #8b6c56;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.fortune-checked {
+  width: 28rpx;
+  height: 28rpx;
+  margin-left: 2rpx;
+  border-radius: 50%;
+  color: white;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fortune-compact-list {
+  margin-top: 6rpx;
+}
+
+.fortune-compact-row {
+  min-height: 46rpx;
+  display: grid;
+  grid-template-columns: 90rpx minmax(0, 1fr);
+  align-items: center;
+  gap: 10rpx;
+  white-space: nowrap;
+}
+
+.fortune-compact-row text:first-child {
+  color: var(--muted);
+  font-size: 20rpx;
+}
+
+.fortune-compact-row text:last-child {
+  overflow: hidden;
+  color: #6d5546;
+  font-size: 24rpx;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+
+.fortune-panel-empty {
+  align-items: center;
+}
+
+.fortune-draw-button {
+  width: 238rpx;
+  min-height: 70rpx;
+  padding: 0 16rpx;
+  border: 1rpx solid #e5c58f;
+  border-radius: 24rpx;
+  color: #9b6c46;
+  background: #fff4d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.fortune-draw-button:active {
+  opacity: .72;
+}
+
+.fortune-empty-tip {
+  margin-top: 10rpx;
+  color: var(--muted);
+  font-size: 22rpx;
 }
 
 .trend {
@@ -683,13 +868,19 @@ export default {
   border-radius: 999rpx;
   color: var(--green);
   background: var(--green-soft);
-  font-size: 21rpx;
+  font-size: 22rpx;
   align-items: center;
   gap: 6rpx;
 }
 
+.trend-row {
+  min-height: 58rpx;
+  display: flex;
+  align-items: center;
+}
+
 .trend-heading {
-  margin-top: 10rpx;
+  margin-top: 4rpx;
 }
 
 .trend-chart {
@@ -730,7 +921,7 @@ export default {
 }
 
 .record-unit {
-  font-size: 17rpx;
+  font-size: 18rpx;
   font-weight: 400;
 }
 
@@ -749,8 +940,8 @@ export default {
 .advice-icon {
   width: 50rpx;
   height: 50rpx;
-  border-radius: 16rpx;
-  background: rgba(255, 255, 255, .68);
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -765,13 +956,13 @@ export default {
 
 .advice-title {
   color: var(--ink);
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-weight: 500;
 }
 
 .advice-text {
   color: #80634f;
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-weight: 400;
   line-height: 1.65;
 }

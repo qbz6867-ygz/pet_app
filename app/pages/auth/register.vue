@@ -49,6 +49,7 @@
 
 <script>
 import AppTopBar from '../../components/AppTopBar.vue'
+import { ensureAccountFamily } from '../../common/family.js'
 
 export default {
   components: { AppTopBar },
@@ -97,14 +98,17 @@ export default {
         return
       }
       const name = `用户${this.phone.slice(-4)}`
-      uni.setStorageSync('authSession', {
+      const session = {
         loggedIn: true,
+        accountId: `phone:${this.phone}`,
         name,
         phone: this.phone,
         avatarText: name.slice(0, 1),
         loginType: 'phone',
         loginAt: Date.now()
-      })
+      }
+      uni.setStorageSync('authSession', session)
+      ensureAccountFamily(session)
       uni.showToast({ title: '登录成功', icon: 'success' })
       setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 500)
     }
@@ -119,13 +123,13 @@ export default {
 .register-heading .section-title { display: block; }
 .register-desc { display: block; margin-top: 10rpx; color: var(--muted); font-size: 20rpx; line-height: 1.6; }
 .form-list { margin-top: 22rpx; display: flex; flex-direction: column; gap: 20rpx; }
-.form-item > text { display: block; margin: 0 0 9rpx 8rpx; color: #756154; font-size: 21rpx; }
+.form-item > text { display: block; margin: 0 0 9rpx 8rpx; color: #756154; font-size: 22rpx; }
 .form-item .field { gap: 13rpx; color: #a8764f; }
 .form-item .field input { min-width: 0; flex: 1; }
 .code-row { display: grid; grid-template-columns: 1fr 174rpx; gap: 12rpx; }
 .code-button { height: 88rpx; border: 1rpx solid #e2cba9; border-radius: 26rpx; color: #936640; background: #fff8ec; font-size: 20rpx; }
 .disabled { color: #b5a99f; background: #eee6da; box-shadow: none; }
-.agreement { width: 100%; margin-top: 24rpx; display: flex; align-items: center; color: #9b8778; font-size: 19rpx; }
+.agreement { width: 100%; margin-top: 24rpx; display: flex; align-items: center; color: #9b8778; font-size: 20rpx; }
 .agreement-check { width: 30rpx; height: 30rpx; margin-right: 9rpx; border: 1rpx solid #d9c5a8; border-radius: 9rpx; display: flex; align-items: center; justify-content: center; }
 .agreement-check.checked { color: white; border-color: #b98a58; background: #b98a58; }
 .register-submit { width: 100%; margin-top: 24rpx; }

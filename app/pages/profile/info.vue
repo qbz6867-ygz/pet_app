@@ -130,7 +130,7 @@ export default {
 .info-card { padding: 26rpx; }
 .info-list { margin-top: 20rpx; display: flex; flex-direction: column; gap: 12rpx; }
 .info-row { min-height: 84rpx; padding: 12rpx 16rpx; border-radius: 22rpx; background: var(--surface-strong); display: grid; grid-template-columns: 56rpx 1fr; align-items: center; gap: 14rpx; }
-.icon { width: 50rpx; height: 50rpx; border-radius: 16rpx; background: white; display: flex; align-items: center; justify-content: center; }
+.icon { width: 50rpx; height: 50rpx; border-radius: 0; background: transparent; display: flex; align-items: center; justify-content: center; }
 .info-row > view { display: flex; flex-direction: column; gap: 3rpx; }
 .info-row .muted { font-size: 18rpx; }
 .info-row input { height: 42rpx; border-bottom: 1rpx solid #d3ad80; }

@@ -24,7 +24,7 @@
 
 <script>
 import AppTopBar from '../../components/AppTopBar.vue'
-import { messages } from '../../common/messages.js'
+import { getMessages } from '../../common/messages.js'
 
 export default {
   components: { AppTopBar },
@@ -34,7 +34,7 @@ export default {
     }
   },
   onLoad(options) {
-    this.message = messages.find(item => item.id === Number(options.id)) || null
+    this.message = getMessages().find(item => item.id === Number(options.id)) || null
   }
 }
 </script>
@@ -53,9 +53,9 @@ export default {
 .message-icon {
   width: 76rpx;
   height: 76rpx;
-  border: 1rpx solid #eadcc7;
-  border-radius: 24rpx;
-  background: var(--gold-soft);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,7 +69,7 @@ export default {
 
 .message-category {
   color: var(--brand-dark);
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-weight: 500;
 }
 
@@ -82,7 +82,7 @@ export default {
   display: block;
   margin-top: 30rpx;
   color: var(--ink);
-  font-size: 34rpx;
+  font-size: 36rpx;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -93,7 +93,7 @@ export default {
   padding-top: 22rpx;
   border-top: 1rpx solid var(--line);
   color: #715e51;
-  font-size: 25rpx;
+  font-size: 28rpx;
   line-height: 1.8;
 }
 

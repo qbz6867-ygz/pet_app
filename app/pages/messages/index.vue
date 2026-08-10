@@ -22,13 +22,13 @@
 
 <script>
 import AppTopBar from '../../components/AppTopBar.vue'
-import { messages } from '../../common/messages.js'
+import { getMessages } from '../../common/messages.js'
 
 export default {
   components: { AppTopBar },
   data() {
     return {
-      messages: messages.map(item => ({ ...item }))
+      messages: getMessages()
     }
   },
   methods: {
@@ -60,19 +60,19 @@ export default {
 .message-icon {
   width: 84rpx;
   height: 84rpx;
-  border: 1rpx solid #eadcc7;
-  border-radius: 26rpx;
-  background: var(--gold-soft);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.message-copy { min-width: 0; display: flex; flex-direction: column; gap: 8rpx; padding-right: 12rpx; }
-.message-title { font-size: 22rpx; font-weight: 600; }
-.message-time { flex-shrink: 0; color: var(--muted); font-size: 16rpx; }
-.message-body { color: #7d6b5e; font-size: 18rpx; line-height: 1.55; }
-.message-category { color: var(--brand-dark); font-size: 16rpx; }
+.message-copy { min-width: 0; display: flex; flex-direction: column; gap: 10rpx; padding-right: 12rpx; }
+.message-title { font-size: 32rpx; font-weight: 600; line-height: 1.35; }
+.message-time { flex-shrink: 0; margin-left: 12rpx; color: var(--muted); font-size: 24rpx; line-height: 1.4; }
+.message-body { color: #7d6b5e; font-size: 28rpx; line-height: 1.6; }
+.message-category { color: var(--brand-dark); font-size: 24rpx; line-height: 1.4; }
 .unread-dot { position: absolute; top: 26rpx; right: 16rpx; width: 12rpx; height: 12rpx; border-radius: 50%; background: #e8a17f; }
 .message-arrow { position: absolute; right: 18rpx; bottom: 22rpx; color: var(--muted); }
 </style>

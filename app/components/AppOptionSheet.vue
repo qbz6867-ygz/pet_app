@@ -108,15 +108,15 @@ export default {
 }
 
 .sheet-title {
-  font-size: 28rpx;
+  font-size: 32rpx;
   font-weight: 600;
 }
 
 .sheet-close {
   width: 50rpx;
   height: 50rpx;
-  border-radius: 16rpx;
-  background: #f7efe2;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -162,7 +162,8 @@ export default {
 }
 
 .option-icon {
-  background: white;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,7 +174,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 3rpx;
-  font-size: 23rpx;
+  font-size: 24rpx;
 }
 
 .option-copy text:last-child:not(:first-child) {

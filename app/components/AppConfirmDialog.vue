@@ -59,8 +59,8 @@ export default {
 .dialog-icon {
   width: 66rpx;
   height: 66rpx;
-  border-radius: 21rpx;
-  background: #f8ead0;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,14 +68,14 @@ export default {
 
 .dialog-title {
   margin-top: 18rpx;
-  font-size: 29rpx;
+  font-size: 32rpx;
   font-weight: 600;
 }
 
 .dialog-message {
   margin-top: 10rpx;
   color: var(--muted);
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.65;
 }
 

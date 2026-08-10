@@ -1,6 +1,6 @@
 <template>
   <view class="page no-tab task-page">
-    <AppTopBar title="新增任务" back center />
+    <AppTopBar :title="pageTitle" back center />
 
     <form class="task-form" @submit="saveTask">
       <label class="form-row">
@@ -53,7 +53,7 @@
             <view class="radio"><AppIcon v-if="form.petIds.includes(pet.id)" name="check-light" size="20rpx" /></view>
             <image v-if="pet.avatar" class="pet-face" :src="pet.avatar" mode="aspectFill" />
             <AppIcon v-else class="pet-face" :name="pet.icon" size="34rpx" />
-            <text>{{ pet.name }}</text>
+            <view class="pet-option-copy"><text>{{ pet.name }}</text><text>{{ pet.sourceLabel }}</text></view>
           </button>
         </view>
       </view>
@@ -65,7 +65,7 @@
         </view>
       </label>
 
-      <button class="primary-button save-button" form-type="submit" :disabled="!canSave">保存</button>
+      <button class="primary-button save-button" form-type="submit" :disabled="!canSave">{{ saveButtonText }}</button>
     </form>
 
     <AppOptionSheet
@@ -105,13 +105,16 @@
 import AppTopBar from '../../components/AppTopBar.vue'
 import AppOptionSheet from '../../components/AppOptionSheet.vue'
 import AppWheelSheet from '../../components/AppWheelSheet.vue'
-import { pets } from '../../common/data.js'
+import { tasks } from '../../common/data.js'
+import { getActivePets } from '../../common/pets.js'
 
 export default {
   components: { AppTopBar, AppOptionSheet, AppWheelSheet },
   data() {
+    const activePets = getActivePets()
     return {
-      pets,
+      pets: activePets,
+      taskId: null,
       repeatOptions: ['仅一次', '每天', '每周', '每月', '自定义'],
       repeatScopeOptions: ['仅本周', '每周重复'],
       weekDays: [
@@ -130,14 +133,46 @@ export default {
       repeatScopePickerOpen: false,
       draftHour: 8,
       draftMinute: 0,
-      form: { name: '', time: '08:00', repeat: '仅一次', repeatScope: '每周重复', weekDays: [], petIds: [1], note: '' }
+      form: { name: '', time: '08:00', repeat: '仅一次', repeatScope: '每周重复', weekDays: [], petIds: [activePets[0].id], note: '' }
     }
   },
   computed: {
+    pageTitle() {
+      return this.taskId === null ? '新增任务' : '编辑任务'
+    },
+    saveButtonText() {
+      return this.taskId === null ? '创建任务' : '保存修改'
+    },
     canSave() {
       const repeatReady = this.form.repeat !== '自定义' || this.form.weekDays.length
       return this.form.name.trim() && this.form.petIds.length && repeatReady
     }
+  },
+  onLoad(options) {
+    if (options.id === undefined) return
+    const taskId = Number(options.id)
+    if (!Number.isFinite(taskId)) return
+
+    const savedTasks = uni.getStorageSync('petTasks')
+    const sourceTasks = Array.isArray(savedTasks) && savedTasks.length ? savedTasks : tasks
+    const task = sourceTasks.find(item => Number(item.id) === taskId)
+    if (!task) return
+
+    this.taskId = taskId
+    const activePetIds = this.pets.map(pet => pet.id)
+    const taskPetIds = Array.isArray(task.petIds) ? task.petIds.filter(id => activePetIds.includes(id)) : []
+    this.form = {
+      name: task.title,
+      time: task.time,
+      repeat: task.repeat || '仅一次',
+      repeatScope: task.repeatScope || '每周重复',
+      weekDays: Array.isArray(task.weekDays) ? [...task.weekDays] : [],
+      petIds: taskPetIds.length ? taskPetIds : [this.pets[0].id],
+      note: task.note || ''
+    }
+    const [hour, minute] = task.time.split(':').map(Number)
+    this.draftHour = hour
+    this.draftMinute = minute
   },
   methods: {
     selectRepeat(value) {
@@ -168,7 +203,33 @@ export default {
     },
     saveTask() {
       if (!this.canSave) return
-      uni.showToast({ title: '任务已保存', icon: 'success' })
+
+      const savedTasks = uni.getStorageSync('petTasks')
+      const sourceTasks = Array.isArray(savedTasks) && savedTasks.length
+        ? savedTasks
+        : tasks.map(item => ({ ...item }))
+      const existingTask = this.taskId === null
+        ? null
+        : sourceTasks.find(item => Number(item.id) === this.taskId)
+      const taskId = this.taskId === null ? Date.now() : this.taskId
+      const taskData = {
+        ...(existingTask || {}),
+        id: taskId,
+        title: this.form.name.trim(),
+        time: this.form.time,
+        note: this.form.note.trim(),
+        repeat: this.form.repeat,
+        repeatScope: this.form.repeatScope,
+        weekDays: [...this.form.weekDays],
+        petIds: [...this.form.petIds],
+        done: existingTask ? Boolean(existingTask.done) : false
+      }
+      const updatedTasks = this.taskId === null
+        ? [...sourceTasks, taskData]
+        : sourceTasks.map(item => Number(item.id) === this.taskId ? taskData : item)
+
+      uni.setStorageSync('petTasks', updatedTasks)
+      uni.showToast({ title: this.taskId === null ? '任务已创建' : '修改已保存', icon: 'success' })
       setTimeout(() => uni.navigateBack(), 500)
     }
   }
@@ -186,7 +247,7 @@ export default {
   grid-template-columns: 126rpx 1fr;
   align-items: center;
   gap: 18rpx;
-  font-size: 25rpx;
+  font-size: 28rpx;
   font-weight: 500;
 }
 
@@ -250,7 +311,7 @@ export default {
   border-radius: 18rpx;
   color: #806a59;
   background: #fffaf3;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-weight: 500;
   line-height: 58rpx;
   text-align: center;
@@ -286,9 +347,9 @@ export default {
   text-align: left;
 }
 
-.pet-option > text {
-  font-size: 24rpx;
-}
+.pet-option-copy { min-width: 0; display: flex; flex-direction: column; gap: 3rpx; }
+.pet-option-copy text:first-child { font-size: 24rpx; }
+.pet-option-copy text:last-child { overflow: hidden; color: var(--muted); font-size: 18rpx; text-overflow: ellipsis; white-space: nowrap; }
 
 .pet-option.selected {
   border: 1rpx solid #dba86e;
@@ -403,6 +464,6 @@ export default {
   align-items: center;
   justify-content: center;
   color: #6a5547;
-  font-size: 34rpx;
+  font-size: 36rpx;
 }
 </style>

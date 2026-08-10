@@ -9,7 +9,7 @@
           <AppIcon v-else :name="pet.icon" size="62rpx" />
         </view>
         <view>
-          <text class="muted">{{ pet.id === 1 ? '当前宠物' : '家庭成员' }}</text>
+          <text class="pet-source">{{ pet.sourceLabel }}</text>
           <text class="pet-name">{{ pet.name }}</text>
           <text class="muted">{{ pet.type }} · {{ pet.age }}</text>
         </view>
@@ -27,11 +27,15 @@
 
 <script>
 import AppTopBar from '../../components/AppTopBar.vue'
-import { pets } from '../../common/data.js'
+import { getActivePets, getPetsForFamily } from '../../common/pets.js'
 
 export default {
   components: { AppTopBar },
-  data() { return { pets } },
+  data() { return { familyCode: '', pets: getActivePets() } },
+  onLoad(options) { this.familyCode = options.familyCode || '' },
+  onShow() {
+    this.pets = this.familyCode ? getPetsForFamily(this.familyCode) : getActivePets()
+  },
   methods: {
     openPet(id) { uni.navigateTo({ url: `/pages/pet/profile?id=${id}` }) },
     openAdd() { uni.navigateTo({ url: '/pages/pet/add' }) }
@@ -73,14 +77,15 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 62rpx;
+  font-size: 58rpx;
 }
 
 .pet-avatar image { width: 100%; height: 100%; }
 .pet-manage-item > view:nth-child(2) { display: flex; flex-direction: column; gap: 5rpx; }
 .pet-name { font-size: 40rpx; font-weight: 600; }
+.pet-source { align-self: flex-start; max-width: 320rpx; overflow: hidden; padding: 5rpx 11rpx; border: 1rpx solid #ead2ae; border-radius: 999rpx; color: #95663f; background: #f7e7c2; font-size: 20rpx; font-weight: 500; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .pet-manage-item .muted { color: rgba(102,82,71,.7); font-size: 18rpx; }
-.arrow { font-size: 44rpx; }
+.arrow { font-size: 48rpx; }
 
 .add-pet {
   width: 100%;
@@ -99,14 +104,14 @@ export default {
 .add-icon {
   width: 62rpx;
   height: 62rpx;
-  border-radius: 20rpx;
-  background: var(--gold-soft);
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--brand-dark);
-  font-size: 38rpx;
+  font-size: 40rpx;
 }
 
-.add-pet .muted { font-size: 21rpx; }
+.add-pet .muted { font-size: 22rpx; }
 </style>

@@ -4,9 +4,9 @@ export const pets = [
 ]
 
 export const tasks = [
-  { id: 1, time: '08:30', title: '早餐喂食', note: '犬粮 80g', done: true },
-  { id: 2, time: '12:30', title: '午间遛弯', note: '建议 30 分钟', done: false },
-  { id: 3, time: '19:00', title: '清洁梳毛', note: '检查皮肤状态', done: false }
+  { id: 1, time: '08:30', title: '早餐喂食', note: '犬粮 80g', petIds: [1], done: true },
+  { id: 2, time: '12:30', title: '午间遛弯', note: '建议 30 分钟', petIds: [1], done: false },
+  { id: 3, time: '19:00', title: '清洁梳毛', note: '检查皮肤状态', petIds: [1], done: false }
 ]
 
 export const breeds = [

@@ -51,10 +51,12 @@
         <text class="comment-avatar">{{ comment.avatar }}</text>
         <view class="comment-content">
           <view class="row-between">
-            <view class="name-row"><text>{{ comment.name }}</text><text v-if="comment.quality" class="quality">优质评论</text></view>
+            <view class="name-row">
+              <text>{{ comment.name }}</text>
+              <text class="date">{{ comment.date }}</text>
+            </view>
             <text class="score">{{ comment.score }}/5</text>
           </view>
-          <text class="date">{{ comment.date }}</text>
           <text class="text">{{ comment.text }}</text>
         </view>
       </view>
@@ -238,12 +240,12 @@ export default {
 
 .score-value > text:last-child {
   color: #92765e;
-  font-size: 21rpx;
+  font-size: 22rpx;
 }
 
 .review-count {
   color: #a48a75;
-  font-size: 17rpx;
+  font-size: 18rpx;
   line-height: 1.45;
 }
 
@@ -264,7 +266,7 @@ export default {
 .distribution-label,
 .distribution-percent {
   color: #8d715d;
-  font-size: 17rpx;
+  font-size: 18rpx;
 }
 
 .distribution-percent {
@@ -301,13 +303,13 @@ export default {
 
 .rate-title {
   color: #60483a;
-  font-size: 25rpx;
+  font-size: 32rpx;
   font-weight: 600;
 }
 
 .rate-hint {
   color: #a08773;
-  font-size: 17rpx;
+  font-size: 18rpx;
   white-space: nowrap;
 }
 
@@ -317,10 +319,9 @@ export default {
 .comment-avatar { width: 56rpx; height: 56rpx; border-radius: 50%; color: white; background: #c8844c; display: flex; align-items: center; justify-content: center; }
 .comment-content { min-width: 0; }
 .name-row { display: flex; align-items: center; gap: 8rpx; font-weight: 600; }
-.quality { padding: 4rpx 9rpx; border-radius: 999rpx; color: #9d6b34; background: #f6e2b5; font-size: 16rpx; }
 .score { padding: 5rpx 10rpx; border: 1rpx solid #e5c69e; border-radius: 999rpx; color: var(--brand); font-size: 18rpx; }
-.date { display: block; margin: 5rpx 0 10rpx; color: var(--muted); font-size: 18rpx; }
-.text { color: #756357; font-size: 22rpx; line-height: 1.65; }
+.date { color: var(--muted); font-size: 18rpx; font-weight: 400; }
+.text { display: block; margin-top: 10rpx; color: #756357; font-size: 26rpx; line-height: 1.65; }
 
 .rating-row {
   display: flex;
@@ -368,7 +369,7 @@ export default {
   justify-content: center;
   gap: 5rpx;
   color: var(--brand-dark);
-  font-size: 21rpx;
+  font-size: 22rpx;
 }
 
 .page-button.disabled {
@@ -416,7 +417,7 @@ export default {
   height: 48rpx;
   padding: 0;
   color: var(--ink);
-  font-size: 22rpx;
+  font-size: 28rpx;
   line-height: 48rpx;
 }
 
@@ -431,7 +432,7 @@ export default {
   border-radius: 22rpx;
   color: #ffffff;
   background: var(--brand-dark);
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-weight: 600;
   line-height: 1;
   display: flex;

@@ -28,7 +28,7 @@
         <label><text>当前体重</text><view class="field weight-field"><input v-model="form.weight" type="digit" placeholder="0.0" /><text>kg</text></view></label>
       </view>
 
-      <button class="primary-button" form-type="submit">创建宠物档案</button>
+      <button class="primary-button" form-type="submit" :disabled="saving">{{ saving ? '正在创建' : '创建宠物档案' }}</button>
     </form>
 
     <AppOptionSheet
@@ -58,12 +58,14 @@
 import AppTopBar from '../../components/AppTopBar.vue'
 import AppOptionSheet from '../../components/AppOptionSheet.vue'
 import AppWheelSheet from '../../components/AppWheelSheet.vue'
+import { createPetProfile } from '../../common/pets.js'
 
 export default {
   components: { AppTopBar, AppOptionSheet, AppWheelSheet },
   data() {
     return {
       avatar: '',
+      saving: false,
       typePickerOpen: false,
       birthdayPickerOpen: false,
       birthdayPickerValue: [26, 0, 0],
@@ -119,8 +121,44 @@ export default {
     },
     save() {
       if (!this.form.name.trim()) return uni.showToast({ title: '请填写宠物昵称', icon: 'none' })
-      uni.showToast({ title: '档案已创建', icon: 'success' })
-      setTimeout(() => uni.navigateBack(), 500)
+      if (this.saving) return
+      this.saving = true
+
+      const finishCreate = (avatarPath = '') => {
+        createPetProfile({
+          name: this.form.name.trim(),
+          type: this.form.breed.trim() || (this.form.type === '猫' ? '猫' : '犬'),
+          age: this.calculateAge(this.form.birthday),
+          icon: this.form.type === '猫' ? 'cat' : 'dog',
+          avatar: avatarPath,
+          gender: '未设置',
+          birthday: this.form.birthday,
+          weight: this.form.weight || '0.0'
+        })
+        uni.showToast({ title: '档案已创建', icon: 'success' })
+        setTimeout(() => uni.navigateBack(), 700)
+      }
+
+      if (!this.avatar) {
+        finishCreate()
+        return
+      }
+
+      uni.saveFile({
+        tempFilePath: this.avatar,
+        success: result => finishCreate(result.savedFilePath),
+        fail: () => finishCreate(this.avatar)
+      })
+    },
+    calculateAge(birthday) {
+      const birthDate = new Date(`${birthday}T00:00:00`)
+      const today = new Date()
+      let months = (today.getFullYear() - birthDate.getFullYear()) * 12 + today.getMonth() - birthDate.getMonth()
+      if (today.getDate() < birthDate.getDate()) months -= 1
+      months = Math.max(0, months)
+      const years = Math.floor(months / 12)
+      const remainingMonths = months % 12
+      return years ? `${years}岁 ${remainingMonths}个月` : `${remainingMonths}个月`
     }
   }
 }
@@ -150,7 +188,7 @@ export default {
   flex-direction: column;
   gap: 13rpx;
   color: #655247;
-  font-size: 23rpx;
+  font-size: 24rpx;
   font-weight: 500;
 }
 
@@ -210,7 +248,7 @@ export default {
 .upload-hint {
   margin-top: 5rpx;
   color: #a79587;
-  font-size: 19rpx;
+  font-size: 20rpx;
   font-weight: 400;
 }
 
@@ -226,5 +264,11 @@ export default {
   width: 100%;
   min-height: 88rpx;
   margin-top: 38rpx;
+}
+
+.add-form .primary-button[disabled] {
+  color: #ad9f92;
+  background: #e9e0d5;
+  box-shadow: none;
 }
 </style>

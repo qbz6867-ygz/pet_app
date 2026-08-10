@@ -1,10 +1,10 @@
 <template>
-  <view class="topbar" :class="{ centered: center }">
+  <view class="topbar" :class="{ centered: center, 'flush-left': flushLeft }" :style="navigationStyle">
     <slot name="left">
       <button v-if="back" class="topbar-action" aria-label="返回" @tap="goBack">
         <AppIcon name="back" size="34rpx" />
       </button>
-      <view v-else class="topbar-space" />
+      <view v-else class="topbar-space" :class="{ collapsed: flushLeft }" />
     </slot>
     <view class="topbar-copy">
       <text v-if="eyebrow" class="topbar-eyebrow">{{ eyebrow }}</text>
@@ -19,18 +19,38 @@
 </template>
 
 <script>
+import { getNavigationStyle } from '../common/navigation.js'
+
 export default {
   name: 'AppTopBar',
+  data() {
+    return {
+      navigationStyle: getNavigationStyle()
+    }
+  },
   props: {
     title: { type: String, required: true },
     eyebrow: { type: String, default: '' },
     back: { type: Boolean, default: false },
     center: { type: Boolean, default: false },
+    flushLeft: { type: Boolean, default: false },
     actionIcon: { type: String, default: '' },
     actionLabel: { type: String, default: '' },
     badge: { type: [String, Number], default: '' }
   },
   emits: ['action'],
+  mounted() {
+    if (typeof uni.onWindowResize !== 'function') return
+    this.navigationResizeHandler = () => {
+      this.navigationStyle = getNavigationStyle()
+    }
+    uni.onWindowResize(this.navigationResizeHandler)
+  },
+  beforeUnmount() {
+    if (this.navigationResizeHandler && typeof uni.offWindowResize === 'function') {
+      uni.offWindowResize(this.navigationResizeHandler)
+    }
+  },
   methods: {
     goBack() {
       const pages = getCurrentPages()
@@ -43,15 +63,32 @@ export default {
 
 <style scoped>
 .topbar {
+  position: -webkit-sticky;
+  position: sticky;
+  z-index: 40;
+  top: 0;
   min-height: 188rpx;
-  padding-top: calc(env(safe-area-inset-top) + 88rpx);
+  margin: 0 -40rpx 24rpx;
+  padding: calc(env(safe-area-inset-top) + 102rpx) 40rpx 20rpx;
+  box-sizing: border-box;
+  background: var(--paper);
+  box-shadow: 0 10rpx 24rpx rgba(91, 67, 48, .045);
   display: grid;
-  grid-template-columns: 72rpx 1fr 72rpx;
+  grid-template-columns: var(--menu-side-width, 72rpx) minmax(0, 1fr) var(--menu-side-width, 72rpx);
+  grid-auto-rows: var(--menu-button-height, 64rpx);
   align-items: center;
 }
 
 .topbar-copy {
   min-width: 0;
+}
+
+.topbar.flush-left {
+  grid-template-columns: 0 minmax(0, 1fr) var(--menu-side-width, 72rpx);
+}
+
+.topbar-space.collapsed {
+  width: 0;
 }
 
 .topbar.centered .topbar-copy {
@@ -80,10 +117,10 @@ export default {
 .topbar-action {
   position: relative;
   width: 64rpx;
-  height: 64rpx;
-  border: 1rpx solid var(--line);
-  border-radius: 20rpx;
-  background: #fffaf3;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,7 +144,7 @@ export default {
   border-radius: 999rpx;
   color: white;
   background: #d47755;
-  font-size: 17rpx;
+  font-size: 18rpx;
   line-height: 30rpx;
 }
 </style>

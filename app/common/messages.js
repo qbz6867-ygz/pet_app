@@ -1,3 +1,5 @@
+import { tasks } from './data.js'
+
 export const messages = [
   {
     id: 1,
@@ -24,12 +26,13 @@ export const messages = [
   {
     id: 2,
     icon: 'paw',
-    title: '午间遛弯即将开始',
-    body: '计划时间为 12:30，建议携带饮水并避开正午高温路段。',
+    title: '午间遛弯',
+    body: '建议 30 分钟',
     time: '今天 10:20',
     fullTime: '2026 年 7 月 30 日 10:20',
     category: '任务提醒',
     unread: true,
+    taskId: 2,
     petId: 1,
     petName: '旺财',
     summary: '旺财的午间遛弯任务即将开始，请根据天气和体感温度适当调整时长。',
@@ -88,3 +91,19 @@ export const messages = [
     actionType: 'reLaunch'
   }
 ]
+
+export const getMessages = () => {
+  const savedTasks = uni.getStorageSync('petTasks')
+  const currentTasks = Array.isArray(savedTasks) && savedTasks.length ? savedTasks : tasks
+
+  return messages.map(message => {
+    if (!message.taskId) return { ...message }
+    const task = currentTasks.find(item => Number(item.id) === Number(message.taskId))
+    if (!task) return { ...message }
+    return {
+      ...message,
+      title: task.title,
+      body: task.note || '暂无任务备注'
+    }
+  })
+}

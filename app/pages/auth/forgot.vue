@@ -114,12 +114,12 @@ export default {
 <style scoped>
 .forgot-page { padding-left: 44rpx; padding-right: 44rpx; }
 .reset-hero { padding: 8rpx 20rpx 30rpx; display: flex; flex-direction: column; align-items: center; text-align: center; }
-.reset-icon { width: 88rpx; height: 88rpx; margin-bottom: 18rpx; border-radius: 29rpx; color: #9b6c46; background: #f6e5c3; display: flex; align-items: center; justify-content: center; }
+.reset-icon { width: 88rpx; height: 88rpx; margin-bottom: 18rpx; border-radius: 0; color: #9b6c46; background: transparent; display: flex; align-items: center; justify-content: center; }
 .reset-hero > text:last-child { margin-top: 9rpx; color: var(--muted); font-size: 20rpx; line-height: 1.6; }
 .reset-card { padding: 30rpx; }
 .form-item { display: block; margin-top: 20rpx; }
 .form-item:first-child { margin-top: 0; }
-.form-item > text { display: block; margin: 0 0 9rpx 8rpx; color: #756154; font-size: 21rpx; }
+.form-item > text { display: block; margin: 0 0 9rpx 8rpx; color: #756154; font-size: 22rpx; }
 .form-item .field { gap: 13rpx; color: #a8764f; }
 .form-item .field input { min-width: 0; flex: 1; }
 .code-row { display: grid; grid-template-columns: 1fr 174rpx; gap: 12rpx; }

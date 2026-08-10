@@ -20,8 +20,6 @@
     { "path": "pages/profile/info", "style": { "navigationStyle": "custom" } },
     { "path": "pages/profile/family", "style": { "navigationStyle": "custom" } },
     { "path": "pages/profile/invite", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/profile/requests", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/profile/settings", "style": { "navigationStyle": "custom" } },
     { "path": "pages/profile/help", "style": { "navigationStyle": "custom" } }
   ],
   "globalStyle": {

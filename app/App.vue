@@ -1,16 +1,5 @@
 <script>
-export default {
-  onLaunch() {
-    const settings = uni.getStorageSync('healthSettings')
-    if (!settings) {
-      uni.setStorageSync('healthSettings', {
-        food: 'status',
-        water: 'status',
-        walk: 'minute'
-      })
-    }
-  }
-}
+export default {}
 </script>
 
 <style>
@@ -75,7 +64,7 @@ button::after {
 
 .section-title {
   color: var(--ink);
-  font-size: 34rpx;
+  font-size: 36rpx;
   font-weight: 500;
   line-height: 1.3;
 }

@@ -3,10 +3,11 @@
     <view class="decor decor-top" aria-hidden="true" />
     <view class="decor decor-side" aria-hidden="true" />
 
-    <view class="auth-safe" />
-    <button class="back-button" aria-label="返回" @tap="goBack">
-      <AppIcon name="back" size="30rpx" />
-    </button>
+    <view class="login-topbar" :style="navigationStyle">
+      <button class="back-button" aria-label="返回" @tap="goBack">
+        <AppIcon name="back" size="30rpx" />
+      </button>
+    </view>
 
     <view class="login-hero">
       <text class="hero-kicker">宠迹管家</text>
@@ -46,11 +47,21 @@
 </template>
 
 <script>
+import { getNavigationStyle } from '../../common/navigation.js'
+import { ensureAccountFamily } from '../../common/family.js'
+
 export default {
   data() {
     return {
+      navigationStyle: getNavigationStyle(),
       agreementAccepted: false
     }
+  },
+  onShow() {
+    this.navigationStyle = getNavigationStyle()
+  },
+  onResize() {
+    this.navigationStyle = getNavigationStyle()
   },
   methods: {
     goBack() {
@@ -98,11 +109,14 @@ export default {
       uni.navigateTo({ url: '/pages/auth/register' })
     },
     finishLogin(profile) {
-      uni.setStorageSync('authSession', {
+      const session = {
         loggedIn: true,
         ...profile,
+        accountId: profile.accountId || profile.openId || profile.openid || `wechat:${Date.now()}`,
         loginAt: Date.now()
-      })
+      }
+      uni.setStorageSync('authSession', session)
+      ensureAccountFamily(session)
       uni.showToast({ title: '登录成功', icon: 'success' })
       setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 500)
     }
@@ -123,22 +137,22 @@ export default {
     radial-gradient(circle at 90% 7%, rgba(240, 207, 154, .34), transparent 28%),
     linear-gradient(180deg, #fffbf4 0%, #fffefd 50%, #ffffff 100%);
 }
-.auth-safe { height: calc(env(safe-area-inset-top) + 88rpx); }
+.login-topbar { position: -webkit-sticky; position: sticky; z-index: 40; top: 0; min-height: calc(env(safe-area-inset-top) + 156rpx); margin: 0 -44rpx; padding: calc(env(safe-area-inset-top) + 88rpx) 44rpx 20rpx; box-sizing: border-box; background: rgba(255,251,245,.96); display: flex; align-items: center; }
 .decor { position: absolute; pointer-events: none; }
 .decor-top { width: 310rpx; height: 310rpx; top: 118rpx; right: -165rpx; border: 44rpx solid rgba(218,174,110,.08); border-radius: 50%; }
 .decor-side { width: 180rpx; height: 180rpx; top: 48%; left: -132rpx; border-radius: 50%; background: rgba(245,226,191,.22); }
-.back-button { width: 68rpx; height: 68rpx; position: relative; z-index: 1; border: 1rpx solid #e7d7c0; border-radius: 22rpx; color: #9a704d; background: rgba(255,251,245,.9); display: flex; align-items: center; justify-content: center; box-shadow: 0 8rpx 24rpx rgba(112,76,43,.05); }
+.back-button { width: 68rpx; height: var(--menu-button-height, 68rpx); position: relative; z-index: 1; border: 1rpx solid #e7d7c0; border-radius: 22rpx; color: #9a704d; background: rgba(255,251,245,.9); display: flex; align-items: center; justify-content: center; box-shadow: 0 8rpx 24rpx rgba(112,76,43,.05); }
 .login-hero { margin-top: 108rpx; position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .hero-logo { width: 184rpx; height: 184rpx; margin-top: 30rpx; border-radius: 44rpx; }
-.hero-kicker { color: #bb8251; font-size: 19rpx; letter-spacing: 7rpx; }
+.hero-kicker { color: #bb8251; font-size: 20rpx; letter-spacing: 7rpx; }
 .hero-title { margin-top: 25rpx; color: #594538; font-size: 48rpx; font-weight: 500; letter-spacing: 2rpx; }
-.hero-desc { margin-top: 16rpx; color: #9c8a7c; font-size: 21rpx; font-weight: 300; }
+.hero-desc { margin-top: 16rpx; color: #9c8a7c; font-size: 22rpx; font-weight: 300; }
 .hero-features { margin-top: 38rpx; padding: 15rpx 25rpx; border: 1rpx solid rgba(225,204,174,.7); border-radius: 999rpx; color: #9b7c63; background: rgba(255,252,247,.72); display: flex; align-items: center; gap: 15rpx; font-size: 18rpx; }
 .feature-dot { width: 5rpx; height: 5rpx; border-radius: 50%; background: #d0a779; }
 .login-bottom { width: 100%; margin-top: auto; position: relative; z-index: 1; }
 .login-actions { width: 100%; display: flex; flex-direction: column; gap: 18rpx; }
 .quick-login,
-.phone-login { width: 100%; height: 92rpx; border-radius: 27rpx; display: flex; align-items: center; justify-content: center; font-size: 25rpx; font-weight: 500; letter-spacing: 1rpx; }
+.phone-login { width: 100%; height: 92rpx; border-radius: 27rpx; display: flex; align-items: center; justify-content: center; font-size: 28rpx; font-weight: 500; letter-spacing: 1rpx; }
 .quick-login { color: white; background: linear-gradient(135deg, #679b70, #568b62); box-shadow: 0 14rpx 30rpx rgba(81,137,94,.18); }
 .phone-login { color: #73543e; border: 1rpx solid #dfc49f; background: rgba(255,252,247,.9); box-shadow: 0 10rpx 25rpx rgba(105,75,48,.04); }
 .agreement { width: 100%; margin: 24rpx 0 5vh; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; color: #a39385; font-size: 18rpx; line-height: 1.8; }

@@ -98,11 +98,11 @@ export default {
 
 .sheet-eyebrow {
   color: var(--muted);
-  font-size: 17rpx;
+  font-size: 18rpx;
 }
 
 .sheet-title {
-  font-size: 26rpx;
+  font-size: 32rpx;
   font-weight: 600;
 }
 

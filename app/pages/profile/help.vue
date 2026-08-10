@@ -36,8 +36,7 @@ export default {
       feedback: '',
       faqs: [
         { q: '如何切换当前宠物？', a: '在首页顶部宠物区域左右滑动即可切换；在记录页也可以点击宠物名称选择。' },
-        { q: '健康打卡单位在哪里修改？', a: '进入“我的—系统设置—健康打卡单位”，可以分别设置食量、饮水和遛弯的记录方式。' },
-        { q: '家庭成员可以看到哪些内容？', a: '加入家庭组的成员可以共同查看宠物档案、健康记录与任务安排，管理员可以管理成员。' },
+        { q: '家庭成员可以看到哪些内容？', a: '账号可加入多个家庭组，并自动看到同步至这些家庭组的宠物档案、健康记录与任务安排；宠物创建者可以选择同步到全部或指定家庭组。' },
         { q: '百科信息能替代医生建议吗？', a: '不能。百科仅供日常养护参考，宠物出现持续异常时应及时联系专业宠物医生。' }
       ]
     }
@@ -61,6 +60,6 @@ export default {
 .faq .row-between { font-weight: 600; }
 .answer { display: block; margin-top: 16rpx; padding-top: 16rpx; border-top: 1rpx solid var(--line-soft); color: var(--muted); font-size: 22rpx; line-height: 1.7; }
 .feedback { margin-top: 24rpx; padding: 24rpx; }
-.feedback textarea { width: 100%; height: 190rpx; margin: 18rpx 0; padding: 18rpx; border-radius: 20rpx; background: var(--surface-strong); font-size: 24rpx; }
+.feedback textarea { width: 100%; height: 190rpx; margin: 18rpx 0; padding: 18rpx; border-radius: 20rpx; background: var(--surface-strong); font-size: 28rpx; }
 .feedback .primary-button { width: 100%; }
 </style>

@@ -45,7 +45,7 @@
       <view v-for="comment in comments.slice(0, 2)" :key="comment.name" class="comment-preview">
         <text class="comment-avatar">{{ comment.avatar }}</text>
         <view>
-          <view class="comment-name"><text>{{ comment.name }}</text><text v-if="comment.quality" class="quality">优质评论</text><text class="score">{{ comment.score }}/5</text></view>
+          <view class="comment-name"><text>{{ comment.name }}</text><text class="comment-date">{{ comment.date }}</text><text class="score">{{ comment.score }}/5</text></view>
           <text class="comment-text">{{ comment.text }}</text>
         </view>
       </view>
@@ -136,33 +136,33 @@ export default {
 
 .breed-name {
   color: #5c4334;
-  font-size: 38rpx;
+  font-size: 40rpx;
   font-weight: 600;
   line-height: 1.25;
 }
 
 .breed-trait {
   color: #755b49;
-  font-size: 23rpx;
+  font-size: 24rpx;
   line-height: 1.5;
 }
 
 .facts-card { margin-top: 22rpx; padding: 24rpx; }
 .facts-grid { margin-top: 18rpx; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12rpx; }
-.facts-grid > view { min-height: 122rpx; padding: 12rpx 5rpx; border-radius: 22rpx; background: #fbf5ec; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5rpx; text-align: center; font-size: 21rpx; }
+.facts-grid > view { min-height: 122rpx; padding: 12rpx 5rpx; border-radius: 22rpx; background: #fbf5ec; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5rpx; text-align: center; font-size: 22rpx; }
 .facts-grid .muted { font-size: 18rpx; }
-.fact-icon { width: 44rpx; height: 44rpx; border: 1rpx solid var(--line); border-radius: 14rpx; background: white; display: flex; align-items: center; justify-content: center; color: var(--brand); }
+.fact-icon { width: 44rpx; height: 44rpx; border: 0; border-radius: 0; background: transparent; display: flex; align-items: center; justify-content: center; color: var(--brand); }
 
 .personality { margin-top: 24rpx; padding: 28rpx 22rpx; border-radius: 30rpx; background: linear-gradient(135deg, #f8e5bc, #f3d49c); }
-.body-copy { display: block; margin-top: 13rpx; color: #756155; font-size: 23rpx; line-height: 1.8; }
+.body-copy { display: block; margin-top: 13rpx; color: #756155; font-size: 24rpx; line-height: 1.8; }
 .care-card, .comments-card { margin-top: 22rpx; padding: 24rpx; }
 .overall { display: flex; flex-direction: column; align-items: flex-end; color: var(--muted); font-size: 18rpx; }
-.overall-score { color: var(--brand-dark); font-size: 26rpx; font-weight: 700; }
+.overall-score { color: var(--brand-dark); font-size: 28rpx; font-weight: 700; }
 .comment-preview { margin-top: 16rpx; padding: 16rpx; border-radius: 22rpx; background: #fbf5ec; display: grid; grid-template-columns: 54rpx 1fr; gap: 14rpx; }
 .comment-avatar { width: 50rpx; height: 50rpx; border-radius: 50%; color: white; background: #c8864f; display: flex; align-items: center; justify-content: center; }
 .comment-name { display: flex; align-items: center; gap: 8rpx; font-size: 22rpx; font-weight: 600; }
-.quality { padding: 4rpx 8rpx; border-radius: 999rpx; color: #9e6d36; background: #f7e3b8; font-size: 16rpx; }
-.score { margin-left: auto; color: var(--brand); font-size: 19rpx; }
-.comment-text { display: block; margin-top: 6rpx; color: var(--muted); font-size: 20rpx; line-height: 1.55; }
+.comment-date { color: var(--muted); font-size: 18rpx; font-weight: 400; }
+.score { margin-left: auto; color: var(--brand); font-size: 20rpx; }
+.comment-text { display: block; margin-top: 6rpx; color: var(--muted); font-size: 26rpx; line-height: 1.55; }
 .all-comments { width: 100%; min-height: 66rpx; margin-top: 16rpx; }
 </style>

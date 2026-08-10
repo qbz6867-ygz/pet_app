@@ -16,24 +16,18 @@
       <view class="account-accent" />
     </button>
 
-    <view class="family card" @tap="openFamily">
-      <view class="row-between">
+    <button class="family card" @tap="openFamilyHub">
+      <view class="family-entry-icon"><AppIcon name="home" size="32rpx" /></view>
+      <view class="family-entry-copy">
         <text class="section-title">家庭组</text>
-        <button class="manage-link" @tap.stop="openFamily"><text>管理</text><AppIcon name="chevron-right" size="20rpx" /></button>
+        <text>{{ familySummary }}</text>
       </view>
-      <view v-if="loggedIn" class="family-avatars">
-        <text v-for="member in ['林','陈','周']" :key="member">{{ member }}</text>
-        <view class="add"><AppIcon name="plus" size="24rpx" /></view>
-      </view>
-      <text v-if="loggedIn" class="family-meta">3 位家庭成员 · 共同照顾 2 只宠物</text>
-    </view>
+      <AppIcon name="chevron-right" size="24rpx" />
+    </button>
 
     <view class="menu-list">
       <button class="menu-row card" @tap="openMessages">
         <view class="menu-icon"><AppIcon name="bell" size="28rpx" /></view><text>消息提醒</text><text class="menu-meta">2 条未读</text><AppIcon name="chevron-right" size="22rpx" />
-      </button>
-      <button class="menu-row card" @tap="openSettings">
-        <view class="menu-icon"><AppIcon name="settings" size="28rpx" /></view><text>系统设置</text><text class="menu-meta" /><AppIcon name="chevron-right" size="22rpx" />
       </button>
       <button class="menu-row card" @tap="openHelp">
         <view class="menu-icon"><AppIcon name="help" size="28rpx" /></view><text>帮助与反馈</text><text class="menu-meta" /><AppIcon name="chevron-right" size="22rpx" />
@@ -47,21 +41,44 @@
 
 <script>
 import AppBottomNav from '../../components/AppBottomNav.vue'
+import { ensureAccountFamily, getFamiliesForAccount, joinFamilyFromInvite } from '../../common/family.js'
 
 export default {
   components: { AppBottomNav },
   data() {
     return {
-      session: {}
+      session: {},
+      familyGroups: [],
+      pendingInviteCode: '',
+      invitePrompted: false
     }
   },
   computed: {
     loggedIn() {
       return Boolean(this.session && this.session.loggedIn)
+    },
+    familySummary() {
+      if (!this.loggedIn) return '登录后创建或加入家庭组'
+      return this.familyGroups.length ? `已加入 ${this.familyGroups.length} 个家庭组` : '尚未创建或加入家庭组'
+    }
+  },
+  onLoad(options) {
+    const inviteCode = options.inviteFamilyCode || options.joinFamilyCode || ''
+    if (inviteCode) {
+      this.pendingInviteCode = inviteCode
+      uni.setStorageSync('pendingFamilyInviteCode', inviteCode)
     }
   },
   onShow() {
     this.session = uni.getStorageSync('authSession') || {}
+    if (!this.loggedIn) {
+      this.familyGroups = []
+      this.promptInviteLogin()
+      return
+    }
+    ensureAccountFamily(this.session)
+    this.refreshFamilies()
+    this.handlePendingInvite()
   },
   methods: {
     openInfo() { uni.navigateTo({ url: '/pages/profile/info' }) },
@@ -71,25 +88,39 @@ export default {
       uni.navigateTo({ url: '/pages/auth/login' })
       return false
     },
-    openFamily() {
-      if (this.loggedIn) {
-        uni.navigateTo({ url: '/pages/profile/family' })
+    openFamilyHub() {
+      if (this.requireLogin()) uni.navigateTo({ url: '/pages/profile/family' })
+    },
+    refreshFamilies() {
+      this.familyGroups = getFamiliesForAccount(this.session)
+    },
+    promptInviteLogin() {
+      const code = this.pendingInviteCode || uni.getStorageSync('pendingFamilyInviteCode')
+      if (!code || this.invitePrompted) return
+      this.invitePrompted = true
+      uni.showModal({
+        title: '家庭组邀请',
+        content: '登录后即可通过邀请加入该家庭组。',
+        confirmText: '去登录',
+        success: ({ confirm }) => { if (confirm) this.openLogin() }
+      })
+    },
+    handlePendingInvite() {
+      const code = this.pendingInviteCode || uni.getStorageSync('pendingFamilyInviteCode')
+      if (!code) return
+      const result = joinFamilyFromInvite(this.session, code)
+      uni.removeStorageSync('pendingFamilyInviteCode')
+      this.pendingInviteCode = ''
+      if (!result.ok) {
+        uni.showToast({ title: result.message, icon: 'none' })
         return
       }
-      uni.showModal({
-        title: '温馨提示',
-        content: '登录后才能使用家庭组功能',
-        confirmText: '去登录',
-        cancelText: '暂不登录',
-        success: ({ confirm }) => {
-          if (confirm) this.openLogin()
-        }
-      })
+      this.refreshFamilies()
+      if (!result.alreadyJoined) uni.showToast({ title: `已加入${result.familyName}`, icon: 'success' })
     },
     openMessages() {
       if (this.requireLogin()) uni.navigateTo({ url: '/pages/messages/index' })
     },
-    openSettings() { uni.navigateTo({ url: '/pages/profile/settings' }) },
     openHelp() { uni.navigateTo({ url: '/pages/profile/help' }) }
   }
 }
@@ -140,7 +171,7 @@ export default {
 .account-name {
   margin-top: 22rpx;
   color: var(--ink);
-  font-size: 39rpx;
+  font-size: 40rpx;
   font-weight: 500;
   line-height: 1.2;
 }
@@ -152,7 +183,7 @@ export default {
   justify-content: center;
   gap: 4rpx;
   color: var(--muted);
-  font-size: 21rpx;
+  font-size: 22rpx;
 }
 
 .account-accent {
@@ -163,46 +194,11 @@ export default {
   background: #d79a72;
 }
 
-.family {
-  margin-top: 18rpx;
-  padding: 26rpx;
-}
-
-.manage-link {
-  color: var(--brand-dark);
-  display: flex;
-  align-items: center;
-  gap: 3rpx;
-}
-
-.family-avatars {
-  margin: 22rpx 0 14rpx;
-  display: flex;
-}
-
-.family-avatars > text,
-.family-avatars .add {
-  width: 58rpx;
-  height: 58rpx;
-  margin-right: -7rpx;
-  border: 4rpx solid #fffaf3;
-  border-radius: 50%;
-  color: white;
-  background: #cf8a61;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 21rpx;
-}
-
-.family-avatars > text:nth-child(2) { background: #c6a06c; }
-.family-avatars > text:nth-child(3) { background: #a98e80; }
-.family-avatars .add { color: #9b7656; background: #f5eadb; }
-
-.family-meta {
-  color: var(--muted);
-  font-size: 21rpx;
-}
+.family { width: 100%; min-height: 118rpx; margin-top: 18rpx; padding: 22rpx 24rpx; display: grid; grid-template-columns: 58rpx 1fr 24rpx; align-items: center; gap: 15rpx; text-align: left; }
+.family-entry-icon { width: 54rpx; height: 54rpx; color: #a6734d; display: flex; align-items: center; justify-content: center; }
+.family-entry-copy { min-width: 0; display: flex; flex-direction: column; gap: 5rpx; }
+.family-entry-copy .section-title { font-size: 32rpx; }
+.family-entry-copy > text:last-child { color: var(--muted); font-size: 22rpx; }
 
 .menu-list {
   margin-top: 24rpx;
@@ -225,9 +221,9 @@ export default {
 .menu-icon {
   width: 52rpx;
   height: 52rpx;
-  border: 1rpx solid var(--line);
-  border-radius: 17rpx;
-  background: #fff6e8;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -10,7 +10,6 @@
       <view class="nav-icon"><AppIcon :name="item.icon" size="40rpx" /></view>
       <text>{{ item.label }}</text>
     </button>
-    <view class="safe-bottom" />
   </view>
 </template>
 
@@ -43,15 +42,15 @@ export default {
 .bottom-nav {
   position: fixed;
   z-index: 20;
-  left: 28rpx;
-  right: 28rpx;
-  bottom: 24rpx;
+  left: 0;
+  right: 0;
+  bottom: 0;
   min-height: 140rpx;
-  padding: 16rpx 18rpx 12rpx;
-  border: 1rpx solid var(--line);
-  border-radius: 46rpx;
+  padding: 16rpx 18rpx calc(12rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid var(--line);
+  border-radius: 0;
   background: #ffffff;
-  box-shadow: 0 12rpx 32rpx rgba(91, 67, 48, 0.11);
+  box-shadow: 0 -8rpx 24rpx rgba(91, 67, 48, 0.075);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
 }
@@ -72,7 +71,7 @@ export default {
 .nav-icon {
   width: 62rpx;
   height: 56rpx;
-  border-radius: 17rpx;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,6 +83,6 @@ export default {
 }
 
 .nav-item.active .nav-icon {
-  background: #f7e3b8;
+  background: transparent;
 }
 </style>

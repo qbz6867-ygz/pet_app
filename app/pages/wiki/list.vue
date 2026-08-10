@@ -134,7 +134,7 @@ export default {
 
 .search-box input {
   flex: 1;
-  font-size: 24rpx;
+  font-size: 28rpx;
 }
 
 .catalog-toolbar {
@@ -144,7 +144,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   color: var(--muted);
-  font-size: 21rpx;
+  font-size: 22rpx;
 }
 
 .filter-trigger {
@@ -159,7 +159,7 @@ export default {
   justify-content: center;
   gap: 9rpx;
   color: var(--brand-dark);
-  font-size: 21rpx;
+  font-size: 22rpx;
 }
 
 .filter-trigger.active {
@@ -208,15 +208,15 @@ export default {
 
 .filter-title {
   color: var(--ink);
-  font-size: 27rpx;
+  font-size: 32rpx;
   font-weight: 600;
 }
 
 .filter-close {
   width: 48rpx;
   height: 48rpx;
-  border-radius: 16rpx;
-  background: #f7efe2;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -229,7 +229,7 @@ export default {
 .filter-group > text {
   display: block;
   margin-bottom: 10rpx;
-  font-size: 21rpx;
+  font-size: 22rpx;
   font-weight: 600;
 }
 
@@ -338,13 +338,13 @@ export default {
   border-radius: 999rpx;
   color: var(--muted);
   background: rgba(255, 255, 255, .82);
-  font-size: 17rpx;
+  font-size: 18rpx;
 }
 
 .breed-name {
   display: block;
   padding: 2rpx 2rpx 6rpx;
-  font-size: 25rpx;
+  font-size: 32rpx;
   font-weight: 500;
 }
 

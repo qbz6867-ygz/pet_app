@@ -1,6 +1,6 @@
 <template>
   <view class="page wiki-page">
-    <AppTopBar title="宠物百科" eyebrow="PAW DAILY" />
+    <AppTopBar title="宠物百科" eyebrow="PAW DAILY" flush-left />
 
     <view class="search-box">
       <AppIcon name="search" size="28rpx" />
@@ -131,7 +131,7 @@ export default {
 
 .search-box input {
   flex: 1;
-  font-size: 26rpx;
+  font-size: 28rpx;
 }
 
 .guide-banner {
@@ -191,7 +191,7 @@ export default {
 .guide-desc {
   margin-top: 12rpx;
   color: #7c6759;
-  font-size: 21rpx;
+  font-size: 22rpx;
   line-height: 1.6;
   white-space: nowrap;
 }
@@ -200,9 +200,9 @@ export default {
   width: 52rpx;
   height: 52rpx;
   margin-top: 22rpx;
-  border: 1rpx solid rgba(157, 109, 62, .13);
-  border-radius: 50%;
-  background: #f4ddac;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -218,7 +218,7 @@ export default {
 
 .wiki-heading > .section-title {
   flex: none;
-  font-size: 38rpx;
+  font-size: 40rpx;
   line-height: 1;
 }
 
@@ -260,7 +260,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 3rpx;
-  font-size: 25rpx;
+  font-size: 28rpx;
   line-height: 1;
 }
 
@@ -329,7 +329,7 @@ export default {
 .breed-name {
   display: block;
   color: var(--ink);
-  font-size: 28rpx;
+  font-size: 32rpx;
   font-weight: 600;
   line-height: 1.35;
 }
