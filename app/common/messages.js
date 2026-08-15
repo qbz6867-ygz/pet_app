@@ -19,8 +19,8 @@ export const messages = [
       { label: '待确认项目', value: '1 项' }
     ],
     advice: '建议在今天结束前完成确认，连续记录有助于更准确地观察旺财的饮食、饮水和精神状态变化。',
-    actionText: '去完成今日打卡',
-    actionUrl: '/pages/home/index',
+    actionText: '查看喂养百科',
+    actionUrl: '/pages/wiki/index',
     actionType: 'reLaunch'
   },
   {
@@ -42,8 +42,8 @@ export const messages = [
       { label: '任务状态', value: '即将开始' }
     ],
     advice: '外出前准备饮水，优先选择阴凉路线；如果地面温度较高，可缩短散步时间并增加室内互动。',
-    actionText: '查看今日任务',
-    actionUrl: '/pages/home/index',
+    actionText: '查看运动百科',
+    actionUrl: '/pages/wiki/index',
     actionType: 'reLaunch'
   },
   {
@@ -86,8 +86,8 @@ export const messages = [
       { label: '综合状态', value: '稳定' }
     ],
     advice: '继续保持固定喂食时间和合理份量，同时结合体重、活动量与排便情况综合观察。',
-    actionText: '查看健康记录',
-    actionUrl: '/pages/records/index',
+    actionText: '查看健康百科',
+    actionUrl: '/pages/wiki/index',
     actionType: 'reLaunch'
   }
 ]

@@ -55,7 +55,7 @@ export default {
     goBack() {
       const pages = getCurrentPages()
       if (pages.length > 1) uni.navigateBack()
-      else uni.reLaunch({ url: '/pages/home/index' })
+      else uni.reLaunch({ url: '/pages/wiki/index' })
     }
   }
 }

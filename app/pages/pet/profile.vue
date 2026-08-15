@@ -74,7 +74,7 @@ export default {
   methods: {
     toggleEditing() {
       if (!this.pet.canEdit) {
-        uni.showToast({ title: '仅家庭组管理员可编辑', icon: 'none' })
+        uni.showToast({ title: '当前宠物资料不可编辑', icon: 'none' })
         return
       }
       if (this.editing) {

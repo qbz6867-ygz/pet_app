@@ -109,7 +109,7 @@ export default {
       this.logoutConfirmOpen = false
       uni.removeStorageSync('authSession')
       uni.showToast({ title: '已退出登录', icon: 'success' })
-      setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 450)
+      setTimeout(() => uni.reLaunch({ url: '/pages/wiki/index' }), 450)
     }
   }
 }

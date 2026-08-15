@@ -48,7 +48,6 @@
 
 <script>
 import { getNavigationStyle } from '../../common/navigation.js'
-import { ensureAccountFamily } from '../../common/family.js'
 
 export default {
   data() {
@@ -67,7 +66,7 @@ export default {
     goBack() {
       const pages = getCurrentPages()
       if (pages.length > 1) uni.navigateBack()
-      else uni.reLaunch({ url: '/pages/profile/index' })
+      else uni.reLaunch({ url: '/pages/wiki/index' })
     },
     requireAgreement() {
       if (this.agreementAccepted) return true
@@ -116,9 +115,8 @@ export default {
         loginAt: Date.now()
       }
       uni.setStorageSync('authSession', session)
-      ensureAccountFamily(session)
       uni.showToast({ title: '登录成功', icon: 'success' })
-      setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 500)
+      setTimeout(() => uni.reLaunch({ url: '/pages/wiki/index' }), 500)
     }
   }
 }

@@ -49,7 +49,6 @@
 
 <script>
 import AppTopBar from '../../components/AppTopBar.vue'
-import { ensureAccountFamily } from '../../common/family.js'
 
 export default {
   components: { AppTopBar },
@@ -108,9 +107,8 @@ export default {
         loginAt: Date.now()
       }
       uni.setStorageSync('authSession', session)
-      ensureAccountFamily(session)
       uni.showToast({ title: '登录成功', icon: 'success' })
-      setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 500)
+      setTimeout(() => uni.reLaunch({ url: '/pages/wiki/index' }), 500)
     }
   }
 }
