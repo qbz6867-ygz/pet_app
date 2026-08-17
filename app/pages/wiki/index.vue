@@ -1,29 +1,42 @@
 <template>
-  <view class="page no-tab wiki-page">
-    <AppTopBar title="宠物百科" eyebrow="PAW DAILY" center>
-      <template #left>
-        <button class="account-avatar" :aria-label="loggedIn ? '查看个人资料' : '登录或注册'" @tap="openAccount">
-          <image v-if="loggedIn && session.avatar" :src="session.avatar" mode="aspectFill" />
-          <text v-else-if="loggedIn">{{ session.avatarText || session.name.slice(0, 1) }}</text>
-          <AppIcon v-else name="user" size="30rpx" />
-        </button>
-      </template>
-    </AppTopBar>
+  <view class="page wiki-page">
+    <AppTopBar title="宠物百科" eyebrow="PAW DAILY" center />
 
     <button class="search-box" aria-label="搜索宠物品种" @tap="openSearch">
       <AppIcon name="search" size="28rpx" />
       <text>搜索宠物品种</text>
     </button>
 
-    <button class="guide-banner" @tap="openGuide">
-      <image class="guide-photo" src="/static/pet-avatar-corgi.png" mode="aspectFill" />
-      <view class="guide-shade" />
-      <view class="guide-copy">
-        <text class="guide-title">新手养宠指南</text>
-        <text class="guide-desc">养宠第一课，从这里开始</text>
-        <view class="guide-icon"><AppIcon name="book" size="38rpx" /></view>
+    <view class="banner-carousel">
+      <swiper
+        class="guide-swiper"
+        :current="bannerCurrent"
+        autoplay
+        circular
+        :interval="4500"
+        :duration="500"
+        @change="onBannerChange"
+      >
+        <swiper-item v-for="banner in guideBanners" :key="banner.title">
+          <button class="guide-banner" @tap="openBanner(banner)">
+            <image class="guide-photo" :src="banner.image" mode="aspectFill" />
+            <view class="guide-shade" />
+            <view class="guide-copy">
+              <text class="guide-title">{{ banner.title }}</text>
+              <text class="guide-desc">{{ banner.description }}</text>
+            </view>
+          </button>
+        </swiper-item>
+      </swiper>
+      <view class="banner-dots" aria-label="轮播图页码">
+        <view
+          v-for="(_, index) in guideBanners"
+          :key="index"
+          class="banner-dot"
+          :class="{ active: bannerCurrent === index }"
+        />
       </view>
-    </button>
+    </view>
 
     <view class="filter-area">
       <view class="breed-controls">
@@ -84,25 +97,31 @@
             <text>{{ breed.type === '犬类' ? '狗类' : '猫类' }}</text>
             <text>{{ breed.bodySize }}</text>
           </view>
-          <text class="breed-desc">{{ breedImpression(breed.id) }}</text>
+          <text class="breed-desc">{{ breedImpression(breed) }}</text>
         </view>
       </view>
     </view>
     <view v-if="!filteredBreeds.length" class="empty">没有找到符合条件的品种</view>
-
+    <AppBottomNav active="wiki" />
   </view>
 </template>
 
 <script>
 import AppTopBar from '../../components/AppTopBar.vue'
+import AppBottomNav from '../../components/AppBottomNav.vue'
 import { breeds } from '../../common/data.js'
 
 export default {
-  components: { AppTopBar },
+  components: { AppTopBar, AppBottomNav },
   data() {
     return {
-      session: {},
       breeds,
+      bannerCurrent: 0,
+      guideBanners: [
+        { title: '新手养宠指南', description: '养宠第一课，从这里开始', image: '/static/pet-avatar-corgi.png', icon: 'book', url: '/pages/wiki/guide' },
+        { title: '猫咪营养指南', description: '读懂猫咪的饮食与饮水需求', image: '/static/guide/cat-nutrition-eating.png', icon: 'cat', url: '/pages/wiki/nutrition?type=cat' },
+        { title: '狗狗营养指南', description: '科学喂养，从每日一餐一水开始', image: '/static/guide/dog-nutrition-eating.png', icon: 'dog', url: '/pages/wiki/nutrition?type=dog' }
+      ],
       breedFilter: '狗狗',
       breedTabs: ['狗狗', '猫咪'],
       filterOpen: false,
@@ -112,31 +131,10 @@ export default {
         { key: 'coat', label: '毛发长度', options: ['全部', '短毛', '中长毛', '长毛'] },
         { key: 'activity', label: '活动量', options: ['全部', '较低', '适中', '较高'] },
         { key: 'shedding', label: '掉毛程度', options: ['全部', '较少', '一般', '较多'] }
-      ],
-      breedImpressions: {
-        1: '短腿萌宠，精力充沛',
-        2: '圆脸憨萌，安静陪伴',
-        3: '暖心伙伴，忠诚可靠',
-        4: '温柔粘人，颜值出众',
-        5: '个性独立，忠诚机警',
-        6: '聪明好学，造型百变',
-        7: '爱说爱聊，陪伴感强',
-        8: '体型霸气，内心温柔',
-        9: '热情友善，家庭好伙伴',
-        10: '聪明专注，运动天赋高',
-        11: '小巧憨萌，城市生活友好',
-        12: '微笑天使，雪白又治愈',
-        13: '适应力强，稳重又亲人',
-        14: '长毛优雅，安静爱陪伴',
-        15: '豹纹醒目，活力十足',
-        16: '无毛暖身，亲人爱撒娇'
-      }
+      ]
     }
   },
   computed: {
-    loggedIn() {
-      return Boolean(this.session && this.session.loggedIn)
-    },
     activeFilterCount() {
       return Object.values(this.filters).filter(value => value !== '全部').length
     },
@@ -153,46 +151,25 @@ export default {
       })
     }
   },
-  onShow() {
-    this.session = uni.getStorageSync('authSession') || {}
-  },
   methods: {
-    openAccount() {
-      uni.navigateTo({ url: this.loggedIn ? '/pages/profile/info' : '/pages/auth/login' })
-    },
     openSearch() { uni.navigateTo({ url: '/pages/wiki/search' }) },
-    openGuide() { uni.navigateTo({ url: '/pages/wiki/guide' }) },
+    onBannerChange(event) { this.bannerCurrent = event.detail.current },
+    openBanner(banner) { uni.navigateTo({ url: banner.url }) },
     resetFilters() {
       this.filters = { bodySize: '全部', coat: '全部', activity: '全部', shedding: '全部' }
     },
     openBreed(id) { uni.navigateTo({ url: `/pages/wiki/detail?id=${id}` }) },
-    breedImpression(id) { return this.breedImpressions[id] || '独特伙伴，值得了解' }
+    breedImpression(breed) {
+      const traits = Array.isArray(breed.traits) && breed.traits.length
+        ? breed.traits
+        : (breed.trait || '').split(/[、，]/).filter(Boolean)
+      return traits.slice(0, 2).join('，') || '独特伙伴，值得了解'
+    }
   }
 }
 </script>
 
 <style scoped>
-.account-avatar {
-  width: 58rpx;
-  height: 58rpx;
-  padding: 0;
-  overflow: hidden;
-  border: 2rpx solid #ead6bd;
-  border-radius: 50%;
-  color: #956941;
-  background: #f8ead7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24rpx;
-  font-weight: 600;
-}
-
-.account-avatar image {
-  width: 100%;
-  height: 100%;
-}
-
 .search-box {
   min-height: 90rpx;
   padding: 0 28rpx;
@@ -211,11 +188,22 @@ export default {
   font-size: 28rpx;
 }
 
+.banner-carousel {
+  position: relative;
+  width: 100%;
+  height: 330rpx;
+  margin-top: 28rpx;
+}
+
+.guide-swiper {
+  width: 100%;
+  height: 100%;
+}
+
 .guide-banner {
   position: relative;
   width: 100%;
-  min-height: 330rpx;
-  margin-top: 28rpx;
+  height: 100%;
   padding: 42rpx 36rpx;
   overflow: hidden;
   border: 1rpx solid #ead8c3;
@@ -223,6 +211,29 @@ export default {
   background: #fff8ef;
   box-shadow: 0 14rpx 38rpx rgba(105, 77, 52, .07);
   text-align: left;
+}
+
+.banner-dots {
+  position: absolute;
+  z-index: 4;
+  right: 28rpx;
+  bottom: 22rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.banner-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 999rpx;
+  background: rgba(133, 94, 61, 0.28);
+  transition: width 0.25s ease, background 0.25s ease;
+}
+
+.banner-dot.active {
+  width: 28rpx;
+  background: #9b6c46;
 }
 
 .guide-photo {
@@ -271,19 +282,6 @@ export default {
   font-size: 24rpx;
   line-height: 1.6;
   white-space: nowrap;
-}
-
-.guide-icon {
-  width: 56rpx;
-  height: 56rpx;
-  margin-top: 30rpx;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #95683f;
 }
 
 .filter-area {

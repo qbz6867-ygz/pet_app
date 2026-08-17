@@ -108,7 +108,7 @@ export default {
       }
       uni.setStorageSync('authSession', session)
       uni.showToast({ title: '登录成功', icon: 'success' })
-      setTimeout(() => uni.reLaunch({ url: '/pages/wiki/index' }), 500)
+      setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 500)
     }
   }
 }

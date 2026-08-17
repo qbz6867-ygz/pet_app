@@ -1,6 +1,7 @@
 {
   "pages": [
     { "path": "pages/wiki/index", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/profile/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/auth/login", "style": { "navigationStyle": "custom" } },
     { "path": "pages/auth/register", "style": { "navigationStyle": "custom" } },
     { "path": "pages/auth/forgot", "style": { "navigationStyle": "custom" } },
@@ -14,6 +15,7 @@
     { "path": "pages/wiki/detail", "style": { "navigationStyle": "custom" } },
     { "path": "pages/wiki/comments", "style": { "navigationStyle": "custom" } },
     { "path": "pages/wiki/guide", "style": { "navigationStyle": "custom" } },
+    { "path": "pages/wiki/nutrition", "style": { "navigationStyle": "custom" } },
     { "path": "pages/profile/info", "style": { "navigationStyle": "custom" } },
     { "path": "pages/profile/help", "style": { "navigationStyle": "custom" } }
   ],

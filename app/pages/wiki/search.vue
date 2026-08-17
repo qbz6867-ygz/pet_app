@@ -16,8 +16,19 @@
       </button>
     </view>
 
+    <view v-if="!query.trim()" class="history-section">
+      <view class="history-heading">
+        <text>历史搜索</text>
+        <button v-if="searchHistory.length" class="history-clear" @tap="clearHistory">清空</button>
+      </view>
+      <view v-if="searchHistory.length" class="history-list">
+        <button v-for="item in searchHistory" :key="item" @tap="useHistory(item)">{{ item }}</button>
+      </view>
+      <text v-else class="history-empty">暂无搜索记录</text>
+    </view>
+
     <view class="result-heading">
-      <text>{{ query.trim() ? '搜索结果' : '全部品种' }}</text>
+      <text>{{ query.trim() ? '搜索结果' : '推荐品种' }}</text>
       <text>{{ filteredBreeds.length }} 个品种</text>
     </view>
 
@@ -58,13 +69,14 @@ export default {
     return {
       query: '',
       breeds,
+      searchHistory: [],
       autoFocus: true
     }
   },
   computed: {
     filteredBreeds() {
       const value = this.query.trim().toLowerCase()
-      if (!value) return this.breeds
+      if (!value) return this.breeds.filter(item => [1, 2, 3, 4, 5].includes(item.id))
       return this.breeds.filter(item => [
         item.name,
         item.type,
@@ -74,14 +86,38 @@ export default {
       ].some(field => String(field || '').toLowerCase().includes(value)))
     }
   },
+  onLoad() {
+    this.searchHistory = uni.getStorageSync('wikiSearchHistory') || []
+  },
   methods: {
     clearQuery() {
       this.query = ''
       this.autoFocus = false
       this.$nextTick(() => { this.autoFocus = true })
     },
-    finishInput() { this.autoFocus = false },
-    openBreed(id) { uni.navigateTo({ url: `/pages/wiki/detail?id=${id}` }) }
+    finishInput() {
+      this.autoFocus = false
+      this.rememberSearch(this.query)
+    },
+    rememberSearch(keyword) {
+      const value = String(keyword || '').trim()
+      if (!value) return
+      this.searchHistory = [value, ...this.searchHistory.filter(item => item !== value)].slice(0, 8)
+      uni.setStorageSync('wikiSearchHistory', this.searchHistory)
+    },
+    useHistory(keyword) {
+      this.query = keyword
+      this.autoFocus = false
+      this.rememberSearch(keyword)
+    },
+    clearHistory() {
+      this.searchHistory = []
+      uni.removeStorageSync('wikiSearchHistory')
+    },
+    openBreed(id) {
+      this.rememberSearch(this.query)
+      uni.navigateTo({ url: `/pages/wiki/detail?id=${id}` })
+    }
   }
 }
 </script>
@@ -119,6 +155,14 @@ export default {
   align-items: center;
   justify-content: center;
 }
+
+.history-section { padding: 30rpx 0 10rpx; }
+.history-heading { display: flex; align-items: center; justify-content: space-between; }
+.history-heading > text { color: var(--ink); font-size: 28rpx; font-weight: 600; }
+.history-clear { padding: 8rpx 0 8rpx 24rpx; color: var(--muted); font-size: 22rpx; }
+.history-list { margin-top: 18rpx; display: flex; flex-wrap: wrap; gap: 14rpx; }
+.history-list button { min-height: 58rpx; padding: 0 22rpx; border: 1rpx solid #eadfd4; border-radius: 999rpx; color: #756155; background: #fffdfa; font-size: 24rpx; }
+.history-empty { display: block; margin-top: 18rpx; color: var(--muted); font-size: 22rpx; }
 
 .result-heading {
   min-height: 92rpx;

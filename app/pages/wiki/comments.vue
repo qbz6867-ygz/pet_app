@@ -1,13 +1,21 @@
 <template>
   <view class="page no-tab comments-page">
-    <AppTopBar :title="breed.name" back />
+    <AppTopBar :title="breed.name" back center />
 
     <view class="summary">
+      <view class="summary-heading row-between">
+        <view class="section-heading">
+          <text class="heading-mark" />
+          <text class="section-heading-text">{{ breed.name }}真实经验</text>
+        </view>
+        <text class="review-count">{{ comments.length }} 条评价</text>
+      </view>
+
       <view class="score-overview">
         <view class="score-main">
           <text class="score-label">综合评分</text>
           <view class="score-value"><text class="score-number">{{ averageScore }}</text><text>/5</text></view>
-          <text class="review-count">来自 {{ comments.length }} 条真实评价</text>
+          <text class="score-caption">来自真实养宠经验</text>
         </view>
 
         <view class="score-distribution">
@@ -35,19 +43,22 @@
             :aria-label="`${score} 分`"
             @tap="rating = score"
           >
-            <AppIcon name="sparkle" size="29rpx" />
+            <AppIcon :name="score <= rating ? 'star-filled' : 'star-empty'" size="28rpx" />
           </button>
         </view>
       </view>
     </view>
 
     <view class="comments-head row-between">
-      <text class="section-title">全部评论</text>
-      <text class="pill">第 {{ currentPage }}/{{ totalPages }} 页</text>
+      <view class="section-heading">
+        <text class="heading-mark" />
+        <text class="section-heading-text">全部评论</text>
+      </view>
+      <text class="page-count">第 {{ currentPage }}/{{ totalPages }} 页</text>
     </view>
 
     <view class="comments-list">
-      <view v-for="(comment, index) in pagedComments" :key="comment.id || `${comment.name}-${comment.date}-${index}`" class="comment-card card">
+      <view v-for="(comment, index) in pagedComments" :key="comment.id || `${comment.name}-${comment.date}-${index}`" class="comment-card">
         <text class="comment-avatar">{{ comment.avatar }}</text>
         <view class="comment-content">
           <view class="row-between">
@@ -197,16 +208,37 @@ export default {
 }
 
 .summary {
-  padding: 30rpx 28rpx 24rpx;
-  border: 1rpx solid #ead9bd;
-  border-radius: 32rpx;
-  background: linear-gradient(145deg, #fffaf0, #f8e7c4);
-  box-shadow: 0 16rpx 42rpx rgba(121, 86, 52, .07);
+  padding: 10rpx 4rpx 34rpx;
+  border-bottom: 1rpx solid var(--line);
+}
+
+.summary-heading {
+  align-items: center;
+  margin-bottom: 26rpx;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.heading-mark {
+  width: 7rpx;
+  height: 32rpx;
+  border-radius: 999rpx;
+  background: #dda052;
+}
+
+.section-heading-text {
+  color: #554137;
+  font-size: 32rpx;
+  font-weight: 650;
 }
 
 .score-overview {
-  padding-bottom: 25rpx;
-  border-bottom: 1rpx solid rgba(143, 105, 69, .15);
+  padding-bottom: 28rpx;
+  border-bottom: 1rpx solid var(--line);
   display: grid;
   grid-template-columns: 174rpx 1fr;
   align-items: center;
@@ -215,14 +247,14 @@ export default {
 
 .score-main {
   min-height: 164rpx;
-  border-right: 1rpx solid rgba(133,92,54,.18);
+  border-right: 1rpx solid var(--line);
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .score-label {
-  color: #94755d;
+  color: var(--muted);
   font-size: 20rpx;
 }
 
@@ -243,9 +275,10 @@ export default {
   font-size: 22rpx;
 }
 
+.score-caption,
 .review-count {
-  color: #a48a75;
-  font-size: 18rpx;
+  color: var(--muted);
+  font-size: 20rpx;
   line-height: 1.45;
 }
 
@@ -266,7 +299,7 @@ export default {
 .distribution-label,
 .distribution-percent {
   color: #8d715d;
-  font-size: 18rpx;
+  font-size: 20rpx;
 }
 
 .distribution-percent {
@@ -274,7 +307,7 @@ export default {
 }
 
 .distribution-track {
-  height: 10rpx;
+  height: 8rpx;
   overflow: hidden;
   border-radius: 999rpx;
   background: rgba(139, 104, 72, .13);
@@ -283,7 +316,7 @@ export default {
 .distribution-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #e2b66e, #c98a4d);
+  background: #d5a765;
 }
 
 .rate-now {
@@ -303,25 +336,26 @@ export default {
 
 .rate-title {
   color: #60483a;
-  font-size: 32rpx;
+  font-size: 28rpx;
   font-weight: 600;
 }
 
 .rate-hint {
-  color: #a08773;
-  font-size: 18rpx;
+  color: var(--muted);
+  font-size: 20rpx;
   white-space: nowrap;
 }
 
-.comments-head { margin: 28rpx 0 16rpx; }
-.comments-list { display: flex; flex-direction: column; gap: 14rpx; }
-.comment-card { padding: 20rpx; display: grid; grid-template-columns: 60rpx 1fr; gap: 14rpx; }
-.comment-avatar { width: 56rpx; height: 56rpx; border-radius: 50%; color: white; background: #c8844c; display: flex; align-items: center; justify-content: center; }
+.comments-head { margin: 34rpx 4rpx 10rpx; }
+.page-count { color: var(--muted); font-size: 20rpx; }
+.comments-list { display: flex; flex-direction: column; }
+.comment-card { padding: 26rpx 4rpx; border-bottom: 1rpx solid var(--line); display: grid; grid-template-columns: 54rpx 1fr; gap: 14rpx; }
+.comment-avatar { width: 50rpx; height: 50rpx; border-radius: 50%; color: white; background: #c8864f; display: flex; align-items: center; justify-content: center; font-size: 22rpx; }
 .comment-content { min-width: 0; }
-.name-row { display: flex; align-items: center; gap: 8rpx; font-weight: 600; }
-.score { padding: 5rpx 10rpx; border: 1rpx solid #e5c69e; border-radius: 999rpx; color: var(--brand); font-size: 18rpx; }
-.date { color: var(--muted); font-size: 18rpx; font-weight: 400; }
-.text { display: block; margin-top: 10rpx; color: #756357; font-size: 26rpx; line-height: 1.65; }
+.name-row { display: flex; align-items: center; gap: 8rpx; font-size: 22rpx; font-weight: 600; }
+.score { color: var(--brand); font-size: 20rpx; }
+.date { color: var(--muted); font-size: 20rpx; font-weight: 400; }
+.text { display: block; margin-top: 6rpx; color: var(--muted); font-size: 28rpx; line-height: 1.55; }
 
 .rating-row {
   display: flex;
@@ -331,22 +365,16 @@ export default {
 .rating-button {
   width: 48rpx;
   height: 48rpx;
-  border: 1rpx solid rgba(139, 96, 56, .18);
-  border-radius: 16rpx;
-  background: rgba(255, 255, 255, .65);
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: .42;
-  transform: scale(.96);
-  transition: opacity .18s ease, background-color .18s ease, transform .18s ease;
+  opacity: .7;
+  transition: opacity .18s ease, transform .18s ease;
 }
 
 .rating-button.active {
-  border-color: rgba(145, 94, 45, .26);
-  background: #fff9ed;
   opacity: 1;
-  transform: scale(1);
+  transform: translateY(-2rpx);
 }
 
 .pagination {
@@ -361,9 +389,9 @@ export default {
   min-width: 132rpx;
   height: 62rpx;
   padding: 0 18rpx;
-  border: 1rpx solid #eadcca;
-  border-radius: 20rpx;
-  background: #fffaf3;
+  border: 1rpx solid var(--line);
+  border-radius: 0;
+  background: #fffdfa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -379,7 +407,7 @@ export default {
 .page-status {
   min-width: 70rpx;
   color: var(--muted);
-  font-size: 18rpx;
+  font-size: 20rpx;
   text-align: center;
 }
 
@@ -389,24 +417,24 @@ export default {
   right: 0;
   bottom: 0;
   left: 0;
-  padding: 14rpx 28rpx 0;
-  border-top: 1rpx solid #eadfce;
-  background: rgba(255, 255, 255, .97);
-  box-shadow: 0 -12rpx 32rpx rgba(83, 61, 43, .08);
+  padding: 18rpx 40rpx 0;
+  border-top: 1rpx solid var(--line);
+  background: rgba(255, 255, 255, .985);
+  box-shadow: 0 -10rpx 30rpx rgba(91, 67, 48, .055);
 }
 
 .composer-inner {
   display: flex;
   align-items: center;
-  gap: 14rpx;
+  gap: 16rpx;
 }
 
 .composer-field {
-  height: 74rpx;
-  padding: 12rpx 20rpx;
-  border: 1rpx solid #eadfce;
+  height: 80rpx;
+  padding: 14rpx 24rpx;
+  border: 1rpx solid #ead7c3;
   border-radius: 24rpx;
-  background: #fbf6ed;
+  background: #fffdfa;
   flex: 1;
   display: flex;
   align-items: center;
@@ -422,27 +450,30 @@ export default {
 }
 
 .comment-placeholder {
-  color: #b7a79a;
+  color: #a9998c;
 }
 
 .submit-review {
-  width: 104rpx;
-  height: 74rpx;
+  width: 116rpx;
+  height: 80rpx;
   padding: 0;
-  border-radius: 22rpx;
+  border-radius: 24rpx;
   color: #ffffff;
   background: var(--brand-dark);
-  font-size: 24rpx;
+  box-shadow: 0 8rpx 18rpx rgba(155, 108, 70, .16);
+  font-size: 28rpx;
   font-weight: 600;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color .18s ease, background-color .18s ease, box-shadow .18s ease;
 }
 
 .submit-review.disabled {
-  color: #b5a99f;
-  background: #eee6da;
+  border: 1rpx solid #eadfce;
+  color: #ae9d8e;
+  background: #f8f2e9;
   box-shadow: none;
 }
 </style>
