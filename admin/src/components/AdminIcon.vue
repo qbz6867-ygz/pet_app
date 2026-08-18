@@ -19,6 +19,7 @@ const paths = {
   close: '<path d="m6 6 12 12M18 6 6 18"/>',
   check: '<path d="m5 12 4 4L19 6"/>',
   more: '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
+  'grip-vertical': '<circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>',
   upload: '<path d="M12 16V4m-5 5 5-5 5 5"/><path d="M5 15v5h14v-5"/>',
   download: '<path d="M12 4v12m5-5-5 5-5-5"/><path d="M5 20h14"/>',
   external: '<path d="M14 5h5v5M19 5l-8 8"/><path d="M17 13v6H5V7h6"/>',
