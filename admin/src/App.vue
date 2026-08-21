@@ -80,6 +80,7 @@ const subPage = ref('')
 const subPageData = ref({})
 const toastMessage = ref('')
 let toastTimer
+let breedContentModuleId = 0
 
 
 
@@ -772,10 +773,48 @@ const userChannelOption = computed(() => {
   }
 })
 const hourBarsOption = {
-  grid: { left: 0, right: 0, top: 4, bottom: 0 },
-  xAxis: { type: 'category', show: false, data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] },
-  yAxis: { type: 'value', show: false },
-  series: [{ type: 'bar', data: [20, 16, 12, 18, 28, 42, 56, 48, 62, 85, 100, 74], barWidth: 8, itemStyle: { color: '#e3b48e', borderRadius: [2, 2, 0, 0] } }]
+  grid: { left: 2, right: 2, top: 8, bottom: 20 },
+  xAxis: {
+    type: 'category',
+    data: Array.from({ length: 24 }, (_, hour) => hour),
+    axisTick: { show: false },
+    axisLine: { lineStyle: { color: '#eee6df' } },
+    axisLabel: {
+      color: '#9a918a',
+      fontSize: 10,
+      interval: 0,
+      formatter: (_, index) => ({ 0: '0时', 6: '6时', 12: '12时', 18: '18时', 23: '24时' })[index] || ''
+    }
+  },
+  yAxis: { type: 'value', show: false, max: 100 },
+  series: [{
+    type: 'bar',
+    data: [24, 18, 14, 11, 10, 12, 16, 18, 21, 24, 28, 34, 40, 45, 41, 37, 35, 38, 46, 62, 86, 94, 78, 51],
+    barWidth: '58%',
+    itemStyle: { color: params => (params.dataIndex >= 20 && params.dataIndex <= 22 ? '#c86f2b' : '#e6b58e'), borderRadius: [2, 2, 0, 0] }
+  }]
+}
+const breedBrowseTrendOption = {
+  grid: { left: 5, right: 5, top: 14, bottom: 20 },
+  xAxis: {
+    type: 'category',
+    boundaryGap: false,
+    data: ['08-07', '08-08', '08-09', '08-10', '08-11', '08-12', '08-13'],
+    axisTick: { show: false },
+    axisLine: { lineStyle: { color: '#eee6df' } },
+    axisLabel: { color: '#9a918a', fontSize: 10, interval: 0 }
+  },
+  yAxis: { type: 'value', show: false, min: 5, max: 8 },
+  series: [{
+    type: 'line',
+    smooth: true,
+    symbol: 'circle',
+    symbolSize: 5,
+    data: [5.8, 6.3, 6.9, 6.4, 6.8, 7.0, 7.2],
+    lineStyle: { width: 2.5, color: '#c86f2b' },
+    itemStyle: { color: '#c86f2b' },
+    areaStyle: { color: 'rgba(200,111,43,0.08)' }
+  }]
 }
 const feedbackTypeOption = {
   tooltip: { trigger: 'item', formatter: '{b}：{c}%' },
@@ -877,6 +916,28 @@ function createDefaultTraitTags(breed = {}) {
   return String(breed.trait || '').split(/[、,，]/).map(tag => tag.trim()).filter(Boolean)
 }
 
+function createBreedContentModule(data = {}) {
+  breedContentModuleId += 1
+  return {
+    id: `content-module-${breedContentModuleId}`,
+    title: '',
+    image: '',
+    content: '',
+    layout: 'image-top',
+    ...data
+  }
+}
+
+function createDefaultContentModules(breed = {}) {
+  if (Array.isArray(breed.contentModules)) {
+    return breed.contentModules.map(module => createBreedContentModule(module))
+  }
+  return [
+    createBreedContentModule({ title: '品种小常识', content: breed.intro || '' }),
+    createBreedContentModule({ title: '日常养护', content: breed.care || '' })
+  ]
+}
+
 function createLifespanRange(value = '') {
   const values = String(value).match(/\d+/g) || []
   return [values[0] || '', values[1] || '']
@@ -895,7 +956,8 @@ function openSubPage(type, data = {}) {
       lifespanStart: data.lifespanStart || lifespanStart,
       lifespanEnd: data.lifespanEnd || lifespanEnd,
       traits: createDefaultTraitTags(data),
-      ratings: Array.isArray(data.ratings) ? data.ratings : createDefaultRatings(data)
+      ratings: Array.isArray(data.ratings) ? data.ratings : createDefaultRatings(data),
+      contentModules: createDefaultContentModules(data)
     }
   } else if (['category-create', 'category-edit'].includes(type)) {
     const originalName = data.name || ''
@@ -934,11 +996,11 @@ function removeCategoryFilterOption(groupIndex, optionIndex) {
 }
 
 function deleteCategory(category) {
+  if (!window.confirm(`确定删除分类“${category.name}”吗？`)) return
   if (category.breedCount > 0) {
     showToast(`该分类仍关联 ${category.breedCount} 个品种，请先调整品种分类`)
     return
   }
-  if (!window.confirm(`确定删除分类“${category.name}”吗？`)) return
   delete breedTagGroupsByType.value[category.name]
   if (selectedTagPetType.value === category.name) selectedTagPetType.value = breedTypeOptions.value[0] || ''
   if (selectedCategoryName.value === category.name) selectedCategoryName.value = ''
@@ -988,6 +1050,37 @@ function handleBreedImageChange(event) {
   reader.readAsDataURL(file)
 }
 
+function addBreedContentModule() {
+  const modules = Array.isArray(subPageData.value.contentModules) ? subPageData.value.contentModules : []
+  subPageData.value = {
+    ...subPageData.value,
+    contentModules: [...modules, createBreedContentModule()]
+  }
+}
+
+function removeBreedContentModule(index) {
+  subPageData.value = {
+    ...subPageData.value,
+    contentModules: subPageData.value.contentModules.filter((_, moduleIndex) => moduleIndex !== index)
+  }
+}
+
+function handleBreedContentImageChange(event, index) {
+  const file = event.target.files?.[0]
+  if (!file) return
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('模块图片大小不能超过 5MB')
+    event.target.value = ''
+    return
+  }
+  const reader = new FileReader()
+  reader.onload = () => {
+    subPageData.value.contentModules[index].image = reader.result
+    showToast('模块图片已添加')
+  }
+  reader.readAsDataURL(file)
+}
+
 function addBreedTrait() {
   const traits = [...(subPageData.value.traits || [])]
   if (traits.length >= 12) {
@@ -1020,8 +1113,21 @@ function closeSubPage() {
 }
 
 function saveBreedDraft() {
+  if (!window.confirm('确定将当前品种资料保存为草稿吗？')) return
   subPageData.value = { ...subPageData.value, status: '草稿' }
   showToast('品种资料已保存为草稿')
+}
+
+function confirmSaveBreed() {
+  const action = subPage.value === 'breed-create' ? '创建并保存该品种' : '保存当前品种修改'
+  if (!window.confirm(`确定${action}吗？`)) return
+  handleSubPagePrimary()
+}
+
+function resetBreedForm() {
+  if (!window.confirm('确定重置当前填写内容吗？所有未保存的修改将被清空。')) return
+  openSubPage('breed-create')
+  showToast('新增品种表单已重置')
 }
 
 function deleteBreedFromList(breed) {
@@ -1034,6 +1140,7 @@ function deleteBreedFromList(breed) {
 
 function toggleBreedPublishStatus() {
   const isPublished = subPageData.value.status === '已发布'
+  if (!window.confirm(`确定${isPublished ? '下架' : '上架'}“${subPageData.value.name || '该品种'}”吗？`)) return
   const nextStatus = isPublished ? '已下架' : '已发布'
   subPageData.value.status = nextStatus
   const breed = breeds.find(item => item.name === subPageData.value.name)
@@ -1256,10 +1363,9 @@ onMounted(() => {
                 <article class="panel form-panel breed-basic-panel"><div class="section-title"><h2>基础资料</h2><p>编辑宠物照片、分类、品种名称与品种简介</p></div><div class="breed-basic-content"><div class="form-grid"><label class="form-field"><span>宠物品种名 *</span><input v-model="subPageData.name" placeholder="请输入宠物品种名" :disabled="subPage === 'breed-view'"></label><label class="form-field"><span>所属分类 *</span><select v-model="subPageData.type" :disabled="subPage === 'breed-view'"><option disabled value="">请选择所属分类</option><option v-for="type in breedTypeOptions" :key="type" :value="type">{{ type }}</option></select></label><label class="form-field full"><span>品种简介 *</span><textarea v-model="subPageData.summary" :disabled="subPage === 'breed-view'" placeholder="概括该品种的外形特点、性格和饲养重点"></textarea><small>建议 30–60 字</small></label></div><div class="breed-basic-media"><strong>宠物照片</strong><div class="cover-preview"><img v-if="subPageData.image" :src="subPageData.image" :alt="subPageData.name"><AdminIcon v-else name="image" :size="42" /><p>{{ subPageData.image ? '品种封面图' : '请选择品种照片' }}</p></div><label v-if="subPage !== 'breed-view'" class="secondary-button full-button breed-image-button"><AdminIcon name="upload" :size="14" />更换图片<input type="file" accept="image/png,image/jpeg,image/webp" @change="handleBreedImageChange"></label><small>建议比例 4:3，大小不超过 5MB</small></div></div></article>
                 <article class="panel form-panel breed-traits-panel"><div class="section-title"><h2>品种特质</h2><p>编辑品种来源、体型、寿命和特质标签</p></div><div class="form-grid"><label class="form-field"><span>原产地 *</span><input v-model="subPageData.origin" :disabled="subPage === 'breed-view'" placeholder="例如：英国威尔士"></label><label class="form-field"><span>体型分类 *</span><select v-model="subPageData.size" :disabled="subPage === 'breed-view'"><option disabled value="">请选择前端展示体型</option><option v-for="size in breedDetailSizeOptions" :key="size" :value="size">{{ size }}</option></select></label><label class="form-field"><span>平均寿命 *</span><span class="lifespan-range"><input v-model.number="subPageData.lifespanStart" type="number" min="1" step="1" inputmode="numeric" :disabled="subPage === 'breed-view'" aria-label="最短寿命" @change="normalizeLifespan('lifespanStart')"><b>–</b><input v-model.number="subPageData.lifespanEnd" type="number" min="1" step="1" inputmode="numeric" :disabled="subPage === 'breed-view'" aria-label="最长寿命" @change="normalizeLifespan('lifespanEnd')"><em>年</em></span></label><div class="form-field full breed-trait-field"><span>宠物标签 *</span><div class="breed-trait-editor"><div v-for="(tag,index) in subPageData.traits" :key="index" class="breed-trait-chip"><input v-model="subPageData.traits[index]" :disabled="subPage === 'breed-view'" :aria-label="`宠物标签 ${index + 1}`"><button v-if="subPage !== 'breed-view'" type="button" :aria-label="`删除宠物标签 ${tag}`" @click="removeBreedTrait(index)"><AdminIcon name="close" :size="12" /></button></div><button v-if="subPage !== 'breed-view'" type="button" class="breed-trait-add" @click="addBreedTrait"><AdminIcon name="plus" :size="13" />添加标签</button></div><small>已添加 {{ subPageData.traits?.length || 0 }} 个标签，可直接修改名称</small></div></div></article>
                 <article class="panel form-panel rating-form-panel"><div class="section-title rating-section-title"><div><h2>品种信息</h2><p>项目名称与 1–5 星评分均可自定义</p></div><div v-if="subPage !== 'breed-view'" class="rating-heading-actions"><button type="button" class="secondary-button" @click="addBreedRating"><AdminIcon name="plus" :size="14" />添加项目</button></div></div><div class="rating-editor-list"><div v-for="(rating,index) in subPageData.ratings" :key="index" class="rating-editor-row"><label><span>项目名称</span><input v-model="rating.label" :disabled="subPage === 'breed-view'" placeholder="例如：亲人程度"></label><div class="rating-score-editor"><span>{{ rating.score }} 星</span><div><button v-for="score in 5" :key="score" type="button" :class="{ active: score <= rating.score }" :aria-label="`${score} 星`" :aria-pressed="rating.score === score" :disabled="subPage === 'breed-view'" @click="setBreedRating(index, score)"><AdminIcon name="star" :size="20" /></button></div></div><button v-if="subPage !== 'breed-view'" type="button" class="rating-delete-button" aria-label="删除评分项目" @click="removeBreedRating(index)"><AdminIcon name="trash" :size="17" /></button></div><div v-if="!subPageData.ratings?.length" class="rating-empty"><AdminIcon name="star" :size="24" /><strong>暂无评分项目</strong><span>点击“添加项目”创建评分内容</span></div></div></article>
-                <article class="panel form-panel"><div class="section-title"><h2>品种小常识</h2><p>编辑详情页展示的品种知识内容</p></div><div class="form-grid"><label class="form-field full"><span>内容信息 *</span><textarea v-model="subPageData.intro" :disabled="subPage === 'breed-view'" placeholder="填写品种历史、性格特点或与家庭相处等知识内容"></textarea><small>建议 50–150 字</small></label></div></article>
-                <article class="panel form-panel"><div class="section-title"><h2>日常养护</h2><p>编辑喂养、运动、清洁和健康注意事项</p></div><div class="form-grid"><label class="form-field full"><span>内容信息 *</span><textarea v-model="subPageData.care" :disabled="subPage === 'breed-view'" placeholder="填写运动、饮食、梳毛、清洁、训练和健康注意事项"></textarea><small>建议 50–150 字</small></label></div></article>
+                <article class="panel breed-content-builder"><div class="section-title breed-content-heading"><div><h2>详情内容</h2><p>自由添加图文模块并设置展示排版</p></div><button v-if="subPage !== 'breed-view'" type="button" class="secondary-button" @click="addBreedContentModule"><AdminIcon name="plus" :size="14" />添加模块</button></div><div class="breed-content-list"><section v-for="(module,index) in subPageData.contentModules" :key="module.id || index" class="breed-content-module"><div class="breed-content-module-heading"><strong>内容模块 {{ index + 1 }}</strong><button v-if="subPage !== 'breed-view'" type="button" :aria-label="`删除内容模块 ${index + 1}`" @click="removeBreedContentModule(index)"><AdminIcon name="trash" :size="16" /></button></div><div class="breed-content-module-grid"><div class="breed-content-module-fields"><label class="form-field"><span>模块标题 *</span><input v-model="module.title" :disabled="subPage === 'breed-view'" placeholder="例如：性格特点"></label><label class="form-field"><span>内容 *</span><textarea v-model="module.content" :disabled="subPage === 'breed-view'" placeholder="输入该模块的详细内容"></textarea></label><div class="form-field"><span>排版</span><div class="breed-layout-options"><button v-for="option in [{value:'image-top',label:'图上文下'},{value:'image-left',label:'图左文右'},{value:'image-right',label:'图右文左'}]" :key="option.value" type="button" :class="{ active: module.layout === option.value }" :disabled="subPage === 'breed-view'" @click="module.layout = option.value"><AdminIcon name="image" :size="15" />{{ option.label }}</button></div></div></div><div class="breed-content-module-media"><div class="breed-content-image-preview"><img v-if="module.image" :src="module.image" :alt="module.title || `内容模块 ${index + 1}`"><AdminIcon v-else name="image" :size="34" /><span>{{ module.image ? '模块配图' : '暂未添加图片' }}</span></div><label v-if="subPage !== 'breed-view'" class="secondary-button breed-content-image-button"><AdminIcon name="upload" :size="14" />{{ module.image ? '更换图片' : '添加图片' }}<input type="file" accept="image/png,image/jpeg,image/webp" @change="handleBreedContentImageChange($event, index)"></label><small>PNG、JPG 或 WebP，不超过 5MB</small></div></div></section><div v-if="!subPageData.contentModules?.length" class="breed-content-empty"><AdminIcon name="document" :size="28" /><strong>暂未添加详情模块</strong><p>{{ subPage === 'breed-view' ? '该品种暂无扩展详情内容。' : '点击“添加模块”，自由编辑标题、图片、内容和排版。' }}</p><button v-if="subPage !== 'breed-view'" type="button" class="secondary-button" @click="addBreedContentModule"><AdminIcon name="plus" :size="14" />添加模块</button></div></div></article>
                 <article class="panel form-panel breed-tags-editor"><div class="section-title"><h2>分类标签</h2></div><div class="form-grid"><div class="form-field full"><div class="breed-tag-groups"><section v-for="group in editorBreedTagGroups" :key="group.name" class="breed-tag-group"><strong>{{ group.name }}</strong><div class="breed-tag-items"><button v-for="tag in group.options" :key="`${group.name}-${tag}`" type="button" class="breed-tag-choice" :class="{ selected: isEditorTagSelected(tag) }" :aria-label="`${isEditorTagSelected(tag) ? '取消选择' : '选择'}${tag}`" :aria-pressed="isEditorTagSelected(tag)" :disabled="subPage === 'breed-view'" @click="toggleEditorTag(tag)"><AdminIcon v-if="isEditorTagSelected(tag)" name="check" :size="12" /><span>{{ tag }}</span></button></div></section></div></div></div></article>
-                <article v-if="['breed-edit','breed-create'].includes(subPage)" class="panel breed-operation-panel"><div class="panel-heading bordered"><h2>品种操作</h2></div><div class="breed-operation-list"><button class="save-operation" type="button" @click="handleSubPagePrimary"><AdminIcon name="check" :size="16" /><span><strong>保存品种</strong></span></button><button v-if="subPage === 'breed-edit'" class="publish-operation" :class="{ 'is-published': subPageData.status === '已发布' }" type="button" @click="toggleBreedPublishStatus"><AdminIcon :name="subPageData.status === '已发布' ? 'download' : 'upload'" :size="16" /><span><strong>{{ subPageData.status === '已发布' ? '下架品种' : '上架品种' }}</strong></span></button><button v-else-if="subPage === 'breed-create'" class="publish-operation" type="button" @click="saveBreedDraft"><AdminIcon name="document" :size="16" /><span><strong>保存为草稿</strong></span></button><button v-if="subPage === 'breed-edit'" class="danger-operation" type="button" @click="deleteBreed"><AdminIcon name="trash" :size="16" /><span><strong>删除品种</strong></span></button><button v-else type="button" @click="closeSubPage"><AdminIcon name="close" :size="16" /><span><strong>取消</strong></span></button></div></article>
+                <article v-if="['breed-edit','breed-create'].includes(subPage)" class="panel breed-operation-panel"><div class="panel-heading bordered"><h2>品种操作</h2></div><div class="breed-operation-list"><button class="save-operation" type="button" @click="confirmSaveBreed"><AdminIcon name="check" :size="16" /><span><strong>保存品种</strong></span></button><button v-if="subPage === 'breed-edit'" class="publish-operation" :class="{ 'is-published': subPageData.status === '已发布' }" type="button" @click="toggleBreedPublishStatus"><AdminIcon :name="subPageData.status === '已发布' ? 'download' : 'upload'" :size="16" /><span><strong>{{ subPageData.status === '已发布' ? '下架品种' : '上架品种' }}</strong></span></button><button v-else-if="subPage === 'breed-create'" class="publish-operation" type="button" @click="saveBreedDraft"><AdminIcon name="document" :size="16" /><span><strong>保存为草稿</strong></span></button><button v-if="subPage === 'breed-edit'" class="danger-operation" type="button" @click="deleteBreed"><AdminIcon name="trash" :size="16" /><span><strong>删除品种</strong></span></button><button v-else type="button" @click="resetBreedForm"><AdminIcon name="reset" :size="16" /><span><strong>重置</strong></span></button></div></article>
               </div>
             </section>
           </template>
@@ -1426,8 +1532,8 @@ onMounted(() => {
 
         <!-- 宠物管理 -->
         <template v-else-if="activeNav === '宠物管理'">
-          <section class="page-title-row"><div><h1>宠物管理</h1></div><div class="header-actions"><button class="secondary-button" @click="openSubPage('breed-import')">导入品种</button><button class="primary-button" @click="openSubPage('breed-create')"><AdminIcon name="plus" :size="16" />新增品种</button></div></section>
-          <section class="panel data-panel breed-management-panel"><div class="filter-bar"><label class="inline-search"><AdminIcon name="search" :size="15" /><input v-model="breedKeyword" placeholder="搜索品种名称"></label><select v-model="breedType"><option>全部类型</option><option v-for="type in breedTypeOptions" :key="type" :value="type">{{ type }}</option></select><select v-model="breedStatus"><option>全部状态</option><option>已发布</option><option>草稿</option><option>已下架</option></select><button class="clear-button" @click="resetBreedFilters">重置</button><span class="result-count">共 {{ filteredBreeds.length }} 条结果</span></div><div class="table-scroll"><table class="management-table"><thead><tr><th><input type="checkbox"></th><th>品种名称</th><th>分类</th><th>状态</th><th>创建时间</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr v-for="breed in paginatedBreeds" :key="breed.name"><td><input type="checkbox"></td><td><div class="breed-cell"><img class="breed-thumb large" :src="breed.image" :alt="breed.name"><div><strong>{{ breed.name }}</strong></div></div></td><td>{{ breed.type }}</td><td><span class="state-pill" :class="breed.status">{{ breed.status }}</span></td><td>{{ breed.createdAt }}</td><td>{{ breed.updatedAt }}</td><td><div class="row-actions breed-row-actions"><button @click="openSubPage('breed-view', breed)">查看</button><button @click="openSubPage('breed-edit', breed)">编辑</button><button class="danger-text" @click="deleteBreedFromList(breed)">删除</button></div></td></tr><tr v-if="filteredBreeds.length === 0"><td colspan="7" class="empty-table-state">没有符合当前筛选条件的品种</td></tr></tbody></table></div><div class="pagination"><span>共 {{ filteredBreeds.length }} 条 · 第 {{ breedPage }}/{{ breedTotalPages }} 页</span><button :disabled="breedPage === 1" aria-label="上一页" @click="setListPage(breedPage, breedPage - 1, breedTotalPages)"><AdminIcon name="chevron-left" :size="13" /></button><button v-for="page in breedTotalPages" :key="page" :class="{ active: breedPage === page }" @click="setListPage(breedPage, page, breedTotalPages)">{{ page }}</button><button :disabled="breedPage === breedTotalPages" aria-label="下一页" @click="setListPage(breedPage, breedPage + 1, breedTotalPages)"><AdminIcon name="chevron-right" :size="13" /></button></div></section>
+          <section class="page-title-row"><div><h1>宠物管理</h1></div><div class="header-actions"><button class="primary-button" @click="openSubPage('breed-create')"><AdminIcon name="plus" :size="16" />新增品种</button></div></section>
+          <section class="panel data-panel breed-management-panel"><div class="filter-bar"><label class="inline-search"><AdminIcon name="search" :size="15" /><input v-model="breedKeyword" placeholder="搜索品种名称"></label><select v-model="breedType"><option>全部类型</option><option v-for="type in breedTypeOptions" :key="type" :value="type">{{ type }}</option></select><select v-model="breedStatus"><option>全部状态</option><option>已发布</option><option>草稿</option><option>已下架</option></select><button class="clear-button" @click="resetBreedFilters">重置</button><span class="result-count">共 {{ filteredBreeds.length }} 条结果</span></div><div class="table-scroll"><table class="management-table"><thead><tr><th><input type="checkbox"></th><th>品种名称</th><th>分类</th><th>状态</th><th>创建时间</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr v-for="breed in paginatedBreeds" :key="breed.name"><td><input type="checkbox"></td><td><div class="breed-cell"><img class="breed-thumb large" :src="breed.image" :alt="breed.name"><div><strong>{{ breed.name }}</strong></div></div></td><td>{{ breed.type }}</td><td><span class="state-pill" :class="breed.status">{{ breed.status }}</span></td><td>{{ breed.createdAt }}</td><td>{{ breed.updatedAt }}</td><td><div class="row-actions breed-row-actions"><button @click="openSubPage('breed-view', breed)">查看</button><button class="danger-text" @click="deleteBreedFromList(breed)">删除</button></div></td></tr><tr v-if="filteredBreeds.length === 0"><td colspan="7" class="empty-table-state">没有符合当前筛选条件的品种</td></tr></tbody></table></div><div class="pagination"><span>共 {{ filteredBreeds.length }} 条 · 第 {{ breedPage }}/{{ breedTotalPages }} 页</span><button :disabled="breedPage === 1" aria-label="上一页" @click="setListPage(breedPage, breedPage - 1, breedTotalPages)"><AdminIcon name="chevron-left" :size="13" /></button><button v-for="page in breedTotalPages" :key="page" :class="{ active: breedPage === page }" @click="setListPage(breedPage, page, breedTotalPages)">{{ page }}</button><button :disabled="breedPage === breedTotalPages" aria-label="下一页" @click="setListPage(breedPage, breedPage + 1, breedTotalPages)"><AdminIcon name="chevron-right" :size="13" /></button></div></section>
         </template>
 
         <!-- 分类管理 -->
@@ -1450,7 +1556,7 @@ onMounted(() => {
             <article class="panel user-growth-panel"><div class="panel-heading"><h2>用户增长趋势</h2><div class="segment-control"><button v-for="mode in ['新增用户','活跃用户']" :key="mode" :class="{ active: userGrowthMode === mode }" @click="userGrowthMode = mode">{{ mode }}</button></div></div><div class="user-growth-chart"><EChart :option="userGrowthOption" height="196px" /></div><div class="growth-summary"><span><i class="orange"/>{{ userGrowthMode }} {{ userGrowthData.total }}</span><span><i class="green"/>{{ userGrowthData.secondary }}</span><strong>{{ userGrowthData.average }}</strong></div></article>
             <article class="panel channel-panel"><div class="panel-heading bordered"><h2>用户来源渠道</h2><div class="period-picker channel-range-picker"><button class="text-button" type="button" :aria-expanded="userChannelRangeOpen" @click.stop="userChannelRangeOpen = !userChannelRangeOpen">{{ userChannelRange }}<AdminIcon :name="userChannelRangeOpen ? 'chevron-up' : 'chevron-down'" :size="13" /></button><div v-if="userChannelRangeOpen" class="period-menu channel-range-menu"><button v-for="range in ['近 7 日','近 30 日','近 90 日']" :key="range" type="button" :class="{ active: userChannelRange === range }" @click.stop="selectUserChannelRange(range)"><span>{{ range }}</span><AdminIcon v-if="userChannelRange === range" name="check" :size="13" /></button></div></div></div><div class="channel-chart"><div class="channel-ring"><EChart :option="userChannelOption" height="150px" /></div><div class="channel-list"><p v-for="item in userChannelItems" :key="item.name"><i :class="item.tone"/><span>{{ item.name }}</span><strong>{{ item.value }}%</strong></p></div></div></article>
           </section>
-          <section class="user-insight-grid"><article class="panel insight-card"><div><span>用户活跃时段</span><strong>20:00–22:00</strong><small>晚间为主要访问高峰</small></div><div class="hour-bars"><EChart :option="hourBarsOption" height="86px" /></div></article><article class="panel insight-card"><div><span>人均浏览品种</span><strong>6.8 个</strong><small>较上月增加 0.9 个</small></div><div class="tiny-trend"><AdminIcon name="trend" :size="68" /></div></article></section>
+          <section class="user-insight-grid"><article class="panel insight-card insight-chart-card"><div class="insight-card-copy"><span>用户活跃时段</span><div class="insight-metric-row"><strong>20:00–22:00</strong><em>晚间高峰</em></div><small>全天访问活跃度分布</small></div><div class="insight-chart"><EChart :option="hourBarsOption" height="112px" /></div></article><article class="panel insight-card insight-chart-card"><div class="insight-card-copy"><span>人均浏览品种</span><div class="insight-metric-row"><strong>6.8 个</strong></div><small>较上月 <b>+0.9 个</b></small></div><div class="insight-chart browse-trend-chart"><div><span>近 7 日趋势</span><strong>今日 7.2 个</strong></div><EChart :option="breedBrowseTrendOption" height="92px" /></div></article></section>
           <section class="panel data-panel"><div class="panel-heading bordered"><h2>用户列表</h2><div class="header-actions"><label class="compact-search"><AdminIcon name="search" :size="15" /><input v-model="userListKeyword" placeholder="搜索昵称或用户编号"></label></div></div><div class="table-scroll"><table class="management-table user-table"><thead><tr><th>用户</th><th>评论</th><th>注册时间</th><th>最近活跃</th><th>操作</th></tr></thead><tbody><tr v-for="user in paginatedUsers" :key="user.id"><td><div class="admin-cell user-cell"><span>{{ user.avatar }}</span><div><strong>{{ user.name }}</strong><small>{{ user.id }}</small></div></div></td><td><button class="target-link" @click="openSubPage('user-detail', user)">{{ user.comments }}<AdminIcon name="chevron-right" :size="12" /></button></td><td>{{ user.registered }}</td><td>{{ user.active }}</td><td><div class="row-actions"><button @click="openSubPage('user-detail', user)">查看详情</button></div></td></tr><tr v-if="!filteredUsers.length"><td colspan="5"><div class="table-empty"><AdminIcon name="search" :size="22" /><strong>没有匹配的用户</strong><span>请调整搜索关键词</span></div></td></tr></tbody></table></div><div class="pagination"><span>共 {{ filteredUsers.length }} 位用户 · 第 {{ userCurrentPage }}/{{ userTotalPages }} 页</span><button :disabled="userCurrentPage === 1" aria-label="上一页" @click="changeUserPage(userCurrentPage - 1)"><AdminIcon name="chevron-left" :size="13" /></button><button v-for="page in userTotalPages" :key="page" :class="{ active: userCurrentPage === page }" @click="changeUserPage(page)">{{ page }}</button><button aria-label="下一页" :disabled="userCurrentPage === userTotalPages" @click="changeUserPage(userCurrentPage + 1)"><AdminIcon name="chevron-right" :size="13" /></button></div></section>
         </template>
 

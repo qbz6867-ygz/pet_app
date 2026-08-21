@@ -6,6 +6,6 @@ export default defineConfig({
   publicDir: '../app/static',
   server: {
     host: true,
-    port: 5274
+    port: 5174
   }
 })
