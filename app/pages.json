@@ -2,9 +2,6 @@
   "pages": [
     { "path": "pages/wiki/index", "style": { "navigationStyle": "custom" } },
     { "path": "pages/profile/index", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/auth/login", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/auth/register", "style": { "navigationStyle": "custom" } },
-    { "path": "pages/auth/forgot", "style": { "navigationStyle": "custom" } },
     { "path": "pages/pet/profile", "style": { "navigationStyle": "custom" } },
     { "path": "pages/pet/manage", "style": { "navigationStyle": "custom" } },
     { "path": "pages/pet/add", "style": { "navigationStyle": "custom" } },

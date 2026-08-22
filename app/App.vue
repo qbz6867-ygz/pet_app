@@ -1,5 +1,13 @@
 <script>
-export default {}
+import { ensureWechatSession } from './common/auth.js'
+
+export default {
+  onLaunch() {
+    ensureWechatSession().catch(() => {
+      uni.showToast({ title: '微信登录失败，请稍后重试', icon: 'none' })
+    })
+  }
+}
 </script>
 
 <style>

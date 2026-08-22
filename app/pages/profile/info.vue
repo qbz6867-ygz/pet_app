@@ -22,57 +22,43 @@
           <view class="icon"><AppIcon :name="field.icon" size="28rpx" /></view>
           <view>
             <text class="muted">{{ field.label }}</text>
-            <input v-if="editing" v-model="profile[field.key]" />
+            <input v-if="editing && field.editable" v-model="profile[field.key]" />
             <text v-else>{{ profile[field.key] }}</text>
           </view>
         </label>
       </view>
     </view>
-    <button class="danger-button logout" @tap="logout">退出登录</button>
-
-    <AppConfirmDialog
-      :open="logoutConfirmOpen"
-      title="退出登录"
-      message="确定要退出当前账号吗？"
-      icon="user"
-      confirm-text="退出登录"
-      danger
-      @close="logoutConfirmOpen = false"
-      @confirm="confirmLogout"
-    />
   </view>
 </template>
 
 <script>
 import AppTopBar from '../../components/AppTopBar.vue'
-import AppConfirmDialog from '../../components/AppConfirmDialog.vue'
+import { ensureWechatSession } from '../../common/auth.js'
 export default {
-  components: { AppTopBar, AppConfirmDialog },
+  components: { AppTopBar },
   data() {
     return {
       editing: false,
-      logoutConfirmOpen: false,
-      profile: { name: '林安', phone: '138 **** 2608', avatar: '' },
+      profile: { name: '微信用户', account: '微信授权登录', avatar: '' },
       fields: [
-        { key: 'name', label: '昵称', icon: 'user' },
-        { key: 'phone', label: '手机号码', icon: 'phone' }
+        { key: 'name', label: '昵称', icon: 'user', editable: true },
+        { key: 'account', label: '登录方式', icon: 'user', editable: false }
       ]
     }
   },
   onLoad() {
-    const session = uni.getStorageSync('authSession')
-    if (!session || !session.loggedIn) {
-      uni.redirectTo({ url: '/pages/auth/login' })
-      return
-    }
-    this.profile.name = session.name || this.profile.name
-    this.profile.phone = this.maskPhone(session.phone) || '微信账号'
-    this.profile.avatar = session.avatar || ''
+    this.loadWechatProfile()
   },
   methods: {
-    maskPhone(phone) {
-      if (!/^1\d{10}$/.test(phone || '')) return ''
-      return `${phone.slice(0, 3)} **** ${phone.slice(-4)}`
+    async loadWechatProfile() {
+      try {
+        const session = await ensureWechatSession()
+        this.profile.name = session.name || this.profile.name
+        this.profile.avatar = session.avatar || ''
+      } catch (error) {
+        uni.showToast({ title: '微信登录失败，请稍后重试', icon: 'none' })
+        setTimeout(() => uni.navigateBack(), 450)
+      }
     },
     onChooseAvatar(event) {
       const tempFilePath = event.detail && event.detail.avatarUrl
@@ -101,15 +87,6 @@ export default {
         uni.showToast({ title: '资料已保存', icon: 'success' })
       }
       this.editing = !this.editing
-    },
-    logout() {
-      this.logoutConfirmOpen = true
-    },
-    confirmLogout() {
-      this.logoutConfirmOpen = false
-      uni.removeStorageSync('authSession')
-      uni.showToast({ title: '已退出登录', icon: 'success' })
-      setTimeout(() => uni.reLaunch({ url: '/pages/profile/index' }), 450)
     }
   }
 }
@@ -134,5 +111,4 @@ export default {
 .info-row > view { display: flex; flex-direction: column; gap: 3rpx; }
 .info-row .muted { font-size: 18rpx; }
 .info-row input { height: 42rpx; border-bottom: 1rpx solid #d3ad80; }
-.logout { width: 100%; margin-top: 24rpx; }
 </style>

@@ -6,9 +6,9 @@
         <text v-else-if="loggedIn">{{ session.avatarText || session.name.slice(0, 1) }}</text>
         <AppIcon v-else name="user" size="52rpx" />
       </view>
-      <text class="account-name">{{ loggedIn ? session.name : '登录 / 注册' }}</text>
+      <text class="account-name">{{ loggedIn ? session.name : '微信登录中' }}</text>
       <view class="account-link">
-        <text>{{ loggedIn ? '查看和修改个人资料' : '登录后管理个人资料与消息' }}</text>
+        <text>{{ loggedIn ? '查看和修改个人资料' : '正在获取微信授权' }}</text>
         <AppIcon name="chevron-right" size="20rpx" />
       </view>
       <view class="account-accent" />
@@ -30,6 +30,7 @@
 
 <script>
 import AppBottomNav from '../../components/AppBottomNav.vue'
+import { ensureWechatSession } from '../../common/auth.js'
 
 export default {
   components: { AppBottomNav },
@@ -42,11 +43,20 @@ export default {
     }
   },
   onShow() {
-    this.session = uni.getStorageSync('authSession') || {}
+    this.loadWechatSession()
   },
   methods: {
-    openAccount() {
-      uni.navigateTo({ url: this.loggedIn ? '/pages/profile/info' : '/pages/auth/login' })
+    async loadWechatSession() {
+      try {
+        this.session = await ensureWechatSession()
+      } catch (error) {
+        this.session = {}
+        uni.showToast({ title: '微信登录失败，请稍后重试', icon: 'none' })
+      }
+    },
+    async openAccount() {
+      if (!this.loggedIn) await this.loadWechatSession()
+      if (this.loggedIn) uni.navigateTo({ url: '/pages/profile/info' })
     },
     openHelp() {
       uni.navigateTo({ url: '/pages/profile/help' })

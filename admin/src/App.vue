@@ -7,6 +7,8 @@ const navItems = [
   { label: '工作台', icon: 'home' },
   { label: '用户数据', icon: 'users' },
   { label: '品种管理', icon: 'pet', children: ['宠物管理', '分类管理'] },
+  { label: '轮播管理', icon: 'image' },
+  { label: '帮助与反馈', icon: 'help' },
   { label: '评论管理', icon: 'message' },
   { label: '系统日志', icon: 'log' },
   { label: '管理员', icon: 'user' }
@@ -81,6 +83,28 @@ const subPageData = ref({})
 const toastMessage = ref('')
 let toastTimer
 let breedContentModuleId = 0
+const bannerKeyword = ref('')
+const bannerStatus = ref('全部状态')
+
+const homeBanners = ref([
+  { id: 1, title: '新手养宠指南', description: '养宠第一课，从这里开始', image: '/static/pet-avatar-corgi.png', url: '/pages/wiki/guide', status: '已发布', updatedAt: '2026-08-18 14:20' },
+  { id: 2, title: '猫咪营养指南', description: '读懂猫咪的饮食与饮水需求', image: '/static/guide/cat-nutrition-eating.png', url: '/pages/wiki/nutrition?type=cat', status: '已发布', updatedAt: '2026-08-16 10:35' },
+  { id: 3, title: '狗狗营养指南', description: '科学喂养，从每日一餐一水开始', image: '/static/guide/dog-nutrition-eating.png', url: '/pages/wiki/nutrition?type=dog', status: '已发布', updatedAt: '2026-08-16 10:32' }
+])
+const helpAdminTab = ref('帮助内容')
+const helpKeyword = ref('')
+const helpStatus = ref('全部状态')
+const helpPageSettings = ref({
+  kicker: '需要帮助？',
+  title: '我们一起解决问题',
+  description: '查看常见问题，或把使用过程中遇到的问题告诉我们。',
+  feedbackTitle: '意见反馈',
+  feedbackPlaceholder: '请描述你的建议或遇到的问题'
+})
+const helpFaqs = ref([
+  { id: 1, category: '使用指南', question: '如何查找需要的百科内容？', answer: '可在宠物百科首页使用搜索框，或按犬类、猫类、喂养、护理等分类浏览。', status: '已发布', updatedAt: '2026-08-18 16:20' },
+  { id: 2, category: '内容说明', question: '百科信息能替代医生建议吗？', answer: '不能。百科仅供日常养护参考，宠物出现持续异常时应及时联系专业宠物医生。', status: '已发布', updatedAt: '2026-08-18 16:18' }
+])
 
 
 
@@ -208,6 +232,33 @@ const breedOrigins = {
   金毛寻回犬: '英国苏格兰',
   暹罗猫: '泰国',
   柴犬: '日本'
+}
+
+const breedTrivia = {
+  威尔士柯基犬: [
+    '威尔士柯基犬最初承担赶牛等牧场工作，低矮的身形有助于它们灵活避开牲畜的踢击。',
+    '它们学习能力强，也可能追逐移动目标或轻咬脚跟。幼年期应进行社会化和正向训练，并避免因体重过高增加腰背与关节负担。'
+  ],
+  英国短毛猫: [
+    '英国短毛猫是历史悠久的英国本土猫种，结实的体格和浓密短毛是其代表性特征。',
+    '它们通常不热衷被长时间抱在怀里，更喜欢四脚着地、安静地待在家人附近。成年后活动量可能下降，因此需要主动安排游戏。'
+  ],
+  布偶猫: [
+    '布偶猫在 20 世纪 60 年代于美国加利福尼亚培育，成熟较慢，可能需要数年才达到完整体型和毛色。',
+    '许多布偶猫喜欢跟随主人，有些还能学习衔回玩具。它们虽然安静，仍需要每天互动，不能把“温顺”理解为可以随意抱弄。'
+  ],
+  金毛寻回犬: [
+    '金毛寻回犬起源于苏格兰，最初被培育用于在陆地和水中衔回猎物，因此不少个体喜欢游泳和叼取游戏。',
+    '它们服从性与合作意愿较高，常参与导盲、搜救和辅助犬工作。友善并不等于不需要训练，幼年期仍应建立规则和稳定的社会化经验。'
+  ],
+  暹罗猫: [
+    '暹罗猫源自泰国旧称“暹罗”，是历史悠久且辨识度很高的重点色猫种。其较深色部位与温度相关的色素表现有关。',
+    '它们通常喜欢参与家庭活动，并会用丰富叫声表达需求。长时间独处可能造成无聊，应提供稳定陪伴和环境丰富化。'
+  ],
+  柴犬: [
+    '柴犬是日本古老犬种之一，过去主要协助猎捕小型猎物。它们聪明但有自己的判断，并非总会机械服从指令。',
+    '柴犬可能对陌生人较保留，也有较强追逐倾向。可靠召回建立前不宜在无围栏环境脱绳，幼年期社会化尤其重要。'
+  ]
 }
 
 const popularPets = [
@@ -427,7 +478,7 @@ function navAttentionCount(label) {
 }
 
 const currentDescription = computed(() => ({
-  工作台: '数据概览', 宠物管理: '管理宠物品种资料', 分类管理: '维护宠物分类及各分类的筛选项', 评论管理: '维护百科评论区内容', 用户数据: '分析用户增长与百科使用行为', 用户反馈: '跟进用户问题与建议', 系统日志: '查看运行状态与异常记录', 管理员: '当前管理员账号设置'
+  工作台: '数据概览', 宠物管理: '管理宠物品种资料', 分类管理: '维护宠物分类及各分类的筛选项', 轮播管理: '管理用户端首页轮播内容', 帮助与反馈: '维护帮助内容并处理用户反馈', 评论管理: '维护百科评论区内容', 用户数据: '分析用户增长与百科使用行为', 用户反馈: '跟进用户问题与建议', 系统日志: '查看运行状态与异常记录', 管理员: '当前管理员账号设置'
 }[activeNav.value]))
 
 const subPageMeta = computed(() => ({
@@ -454,6 +505,11 @@ const subPageMeta = computed(() => ({
   'user-activity': ['用户行为记录', `查看${subPageData.value.name || '用户'}的完整访问与互动轨迹`],
   'admin-edit': ['账号设置', '修改当前管理员的账号资料'],
   'admin-log': ['操作日志', `查看${subPageData.value.name || '管理员'}的后台操作记录`],
+  'banner-create': ['新增轮播内容', '配置用户端首页轮播图'],
+  'banner-edit': ['编辑轮播内容', `维护“${subPageData.value.title || '轮播图'}”的展示信息`],
+  'help-create': ['新增常见问题', '创建用户端帮助内容'],
+  'help-edit': ['编辑常见问题', `维护“${subPageData.value.question || '常见问题'}”`],
+  'help-copy-edit': ['页面文案', '设置用户端“帮助与反馈”页面的标题和引导内容'],
   'log-settings': ['日志设置', '配置日志记录、保留期限与异常告警规则']
 }[subPage.value] || ['详情页面', '查看与维护详细信息']))
 
@@ -466,11 +522,27 @@ const subPageGroup = computed(() => {
   if (subPage.value.startsWith('feedback-')) return 'feedback'
   if (subPage.value.startsWith('user-')) return 'user'
   if (subPage.value.startsWith('log-')) return 'log'
+  if (subPage.value.startsWith('banner-')) return 'banner'
+  if (subPage.value.startsWith('help-')) return 'help'
   if (subPage.value.startsWith('admin-') || subPage.value === 'role-manage') return 'admin'
   return ''
 })
 const isGroupSubPage = computed(() => ['group-create', 'group-edit'].includes(subPage.value))
 const isCategorySubPage = computed(() => ['category-create', 'category-edit'].includes(subPage.value))
+
+const filteredHomeBanners = computed(() => homeBanners.value.filter(banner => {
+  const keyword = bannerKeyword.value.trim()
+  const matchesKeyword = !keyword || banner.title.includes(keyword) || banner.description.includes(keyword)
+  const matchesStatus = bannerStatus.value === '全部状态' || banner.status === bannerStatus.value
+  return matchesKeyword && matchesStatus
+}))
+const publishedBannerCount = computed(() => homeBanners.value.filter(banner => banner.status === '已发布').length)
+const filteredHelpFaqs = computed(() => helpFaqs.value.filter(faq => {
+  const keyword = helpKeyword.value.trim()
+  const matchesKeyword = !keyword || faq.question.includes(keyword) || faq.answer.includes(keyword)
+  const matchesStatus = helpStatus.value === '全部状态' || faq.status === helpStatus.value
+  return matchesKeyword && matchesStatus
+}))
 
 const filteredBreeds = computed(() => breeds.filter(item => {
   const matchType = breedType.value === '全部类型' || item.type === breedType.value
@@ -932,8 +1004,11 @@ function createDefaultContentModules(breed = {}) {
   if (Array.isArray(breed.contentModules)) {
     return breed.contentModules.map(module => createBreedContentModule(module))
   }
+  const trivia = Array.isArray(breed.trivia) && breed.trivia.length
+    ? breed.trivia
+    : breedTrivia[breed.name] || [breed.intro].filter(Boolean)
   return [
-    createBreedContentModule({ title: '品种小常识', content: breed.intro || '' }),
+    createBreedContentModule({ title: breed.name ? `${breed.name}小常识` : '', content: trivia.join('\n\n') }),
     createBreedContentModule({ title: '日常养护', content: breed.care || '' })
   ]
 }
@@ -959,6 +1034,27 @@ function openSubPage(type, data = {}) {
       ratings: Array.isArray(data.ratings) ? data.ratings : createDefaultRatings(data),
       contentModules: createDefaultContentModules(data)
     }
+  } else if (['banner-create', 'banner-edit'].includes(type)) {
+    subPageData.value = {
+      id: data.id || null,
+      title: data.title || '',
+      description: data.description || '',
+      image: data.image || '',
+      url: data.url || '',
+      status: data.status || '草稿',
+      updatedAt: data.updatedAt || ''
+    }
+  } else if (['help-create', 'help-edit'].includes(type)) {
+    subPageData.value = {
+      id: data.id || null,
+      category: data.category || '使用指南',
+      question: data.question || '',
+      answer: data.answer || '',
+      status: data.status || '草稿',
+      updatedAt: data.updatedAt || ''
+    }
+  } else if (type === 'help-copy-edit') {
+    subPageData.value = { ...helpPageSettings.value }
   } else if (['category-create', 'category-edit'].includes(type)) {
     const originalName = data.name || ''
     const sourceGroups = data.groups || breedTagGroupsByType.value[originalName] || []
@@ -1081,6 +1177,70 @@ function handleBreedContentImageChange(event, index) {
   reader.readAsDataURL(file)
 }
 
+function handleBannerImageChange(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('轮播图片大小不能超过 5MB')
+    event.target.value = ''
+    return
+  }
+  const reader = new FileReader()
+  reader.onload = () => {
+    subPageData.value = { ...subPageData.value, image: reader.result }
+    showToast('轮播图片已更新')
+  }
+  reader.readAsDataURL(file)
+}
+
+function adminBannerImage(image) {
+  return image?.startsWith('/static/') ? image.replace('/static/', '/') : image
+}
+
+function moveHomeBanner(index, direction) {
+  const targetIndex = index + direction
+  if (targetIndex < 0 || targetIndex >= homeBanners.value.length) return
+  const items = [...homeBanners.value]
+  const [banner] = items.splice(index, 1)
+  items.splice(targetIndex, 0, banner)
+  homeBanners.value = items
+  showToast('轮播顺序已更新')
+}
+
+function toggleHomeBannerStatus(banner) {
+  banner.status = banner.status === '已发布' ? '已下架' : '已发布'
+  banner.updatedAt = new Date().toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-')
+  showToast(banner.status === '已发布' ? '轮播内容已发布' : '轮播内容已下架')
+}
+
+function deleteHomeBanner(banner) {
+  if (!window.confirm(`确定删除轮播内容“${banner.title}”吗？`)) return
+  homeBanners.value = homeBanners.value.filter(item => item.id !== banner.id)
+  showToast('轮播内容已删除')
+}
+
+function moveHelpFaq(index, direction) {
+  const targetIndex = index + direction
+  if (targetIndex < 0 || targetIndex >= helpFaqs.value.length) return
+  const items = [...helpFaqs.value]
+  const [faq] = items.splice(index, 1)
+  items.splice(targetIndex, 0, faq)
+  helpFaqs.value = items
+  showToast('常见问题顺序已更新')
+}
+
+function toggleHelpFaqStatus(faq) {
+  faq.status = faq.status === '已发布' ? '已下架' : '已发布'
+  faq.updatedAt = new Date().toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-')
+  showToast(faq.status === '已发布' ? '常见问题已发布' : '常见问题已下架')
+}
+
+function deleteHelpFaq(faq) {
+  if (!window.confirm(`确定删除问题“${faq.question}”吗？`)) return
+  helpFaqs.value = helpFaqs.value.filter(item => item.id !== faq.id)
+  showToast('常见问题已删除')
+}
+
 function addBreedTrait() {
   const traits = [...(subPageData.value.traits || [])]
   if (traits.length >= 12) {
@@ -1188,6 +1348,60 @@ function handleSubPagePrimary() {
     }
     subPageData.value = { ...payload, _originalName: payload.name }
     showToast('品种资料已保存')
+  } else if (['banner-create', 'banner-edit'].includes(subPage.value)) {
+    const payload = {
+      ...subPageData.value,
+      title: String(subPageData.value.title || '').trim(),
+      description: String(subPageData.value.description || '').trim(),
+      image: String(subPageData.value.image || '').trim(),
+      url: String(subPageData.value.url || '').trim(),
+      updatedAt: new Date().toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-')
+    }
+    if (!payload.title || !payload.description || !payload.image || !payload.url) {
+      showToast('请完整填写标题、说明、图片和跳转路径')
+      return
+    }
+    if (subPage.value === 'banner-edit') {
+      const index = homeBanners.value.findIndex(banner => banner.id === payload.id)
+      if (index >= 0) homeBanners.value[index] = payload
+    } else {
+      payload.id = Date.now()
+      homeBanners.value.push(payload)
+    }
+    subPageData.value = { ...payload }
+    subPage.value = 'banner-edit'
+    showToast('轮播内容已保存')
+  } else if (subPage.value === 'help-copy-edit') {
+    const payload = Object.fromEntries(Object.entries(subPageData.value).map(([key, value]) => [key, String(value || '').trim()]))
+    if (Object.values(payload).some(value => !value)) {
+      showToast('请完整填写页面文案')
+      return
+    }
+    helpPageSettings.value = payload
+    subPageData.value = { ...payload }
+    showToast('帮助页面文案已保存')
+  } else if (['help-create', 'help-edit'].includes(subPage.value)) {
+    const payload = {
+      ...subPageData.value,
+      category: String(subPageData.value.category || '').trim(),
+      question: String(subPageData.value.question || '').trim(),
+      answer: String(subPageData.value.answer || '').trim(),
+      updatedAt: new Date().toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-')
+    }
+    if (!payload.category || !payload.question || !payload.answer) {
+      showToast('请完整填写分类、问题和答案')
+      return
+    }
+    if (subPage.value === 'help-edit') {
+      const index = helpFaqs.value.findIndex(faq => faq.id === payload.id)
+      if (index >= 0) helpFaqs.value[index] = payload
+    } else {
+      payload.id = Date.now()
+      helpFaqs.value.push(payload)
+    }
+    subPageData.value = { ...payload }
+    subPage.value = 'help-edit'
+    showToast('常见问题已保存')
   } else if (['category-create', 'category-edit'].includes(subPage.value)) {
     const name = (subPageData.value.name || '').trim()
     const originalName = subPageData.value._originalName || ''
@@ -1370,6 +1584,56 @@ onMounted(() => {
             </section>
           </template>
 
+          <!-- 轮播二级页面 -->
+          <template v-else-if="subPageGroup === 'banner'">
+            <section class="banner-editor-layout">
+              <article class="panel form-panel banner-editor-form">
+                <div class="section-title"><div><h2>轮播内容</h2><p>标题、说明与跳转路径将展示在用户端首页</p></div></div>
+                <div class="form-grid">
+                  <label class="form-field"><span>轮播标题 *</span><input v-model="subPageData.title" placeholder="例如：新手养宠指南"></label>
+                  <label class="form-field"><span>发布状态 *</span><select v-model="subPageData.status"><option>草稿</option><option>已发布</option><option>已下架</option></select></label>
+                  <label class="form-field full"><span>内容说明 *</span><textarea v-model="subPageData.description" placeholder="输入轮播图的简短说明"></textarea></label>
+                  <label class="form-field full"><span>小程序跳转路径 *</span><input v-model="subPageData.url" placeholder="例如：/pages/wiki/guide"><small>填写以 /pages/ 开头的小程序页面路径，可附带查询参数</small></label>
+                </div>
+                <div class="banner-image-field"><div><strong>轮播图片 *</strong><small>建议使用横向图片，PNG、JPG 或 WebP，不超过 5MB</small></div><label class="secondary-button banner-upload-button"><AdminIcon name="upload" :size="15" />{{ subPageData.image ? '更换图片' : '上传图片' }}<input type="file" accept="image/png,image/jpeg,image/webp" @change="handleBannerImageChange"></label></div>
+              </article>
+              <aside class="panel banner-preview-panel">
+                <div class="panel-heading bordered"><h2>用户端效果预览</h2></div>
+                <div class="banner-device-preview"><div class="banner-preview-card"><img v-if="subPageData.image" :src="adminBannerImage(subPageData.image)" :alt="subPageData.title || '轮播图片'"><span v-else class="banner-preview-placeholder"><AdminIcon name="image" :size="36" />等待上传图片</span><div class="banner-preview-shade"></div><div class="banner-preview-copy"><strong>{{ subPageData.title || '轮播标题' }}</strong><span>{{ subPageData.description || '轮播内容说明' }}</span></div><div class="banner-preview-dots"><i class="active"></i><i></i><i></i></div></div></div>
+                <div class="banner-preview-meta"><span>跳转目标</span><strong>{{ subPageData.url || '暂未设置' }}</strong></div>
+              </aside>
+            </section>
+          </template>
+
+          <!-- 帮助内容二级页面 -->
+          <template v-else-if="subPageGroup === 'help'">
+            <section v-if="subPage === 'help-copy-edit'" class="help-content-layout help-copy-editor-page">
+              <article class="panel help-copy-panel">
+                <div class="section-title"><div><h2>页面文案</h2><p>设置“我的－帮助与反馈”页面的标题和引导内容</p></div></div>
+                <div class="help-copy-form">
+                  <label class="form-field"><span>引导短句 *</span><input v-model="subPageData.kicker"></label>
+                  <label class="form-field"><span>页面标题 *</span><input v-model="subPageData.title"></label>
+                  <label class="form-field full"><span>页面说明 *</span><textarea v-model="subPageData.description"></textarea></label>
+                  <label class="form-field"><span>反馈区标题 *</span><input v-model="subPageData.feedbackTitle"></label>
+                  <label class="form-field"><span>输入框提示 *</span><input v-model="subPageData.feedbackPlaceholder"></label>
+                </div>
+              </article>
+              <aside class="panel help-page-preview"><div class="panel-heading bordered"><h2>用户端文案预览</h2></div><div class="help-preview-hero"><small>{{ subPageData.kicker }}</small><strong>{{ subPageData.title }}</strong><p>{{ subPageData.description }}</p></div><div class="help-preview-feedback"><strong>{{ subPageData.feedbackTitle }}</strong><span>{{ subPageData.feedbackPlaceholder }}</span></div></aside>
+            </section>
+            <section v-else class="help-editor-layout">
+              <article class="panel form-panel help-editor-form">
+                <div class="section-title"><div><h2>常见问题内容</h2><p>保存后将用于用户端“帮助与反馈”页面</p></div></div>
+                <div class="form-grid">
+                  <label class="form-field"><span>问题分类 *</span><select v-model="subPageData.category"><option>使用指南</option><option>账号相关</option><option>宠物资料</option><option>内容说明</option><option>其他问题</option></select></label>
+                  <label class="form-field"><span>发布状态 *</span><select v-model="subPageData.status"><option>草稿</option><option>已发布</option><option>已下架</option></select></label>
+                  <label class="form-field full"><span>问题标题 *</span><input v-model="subPageData.question" placeholder="请输入用户常见问题"></label>
+                  <label class="form-field full"><span>问题答案 *</span><textarea v-model="subPageData.answer" placeholder="请输入清晰、准确的回答"></textarea><small>建议直接回答用户问题，避免使用过长或含糊的表述</small></label>
+                </div>
+              </article>
+              <aside class="panel help-faq-preview-panel"><div class="panel-heading bordered"><h2>用户端效果预览</h2></div><div class="help-faq-device"><span>{{ subPageData.category || '问题分类' }}</span><div><strong>{{ subPageData.question || '常见问题标题' }}</strong><AdminIcon name="minus" :size="15" /></div><p>{{ subPageData.answer || '问题答案将显示在这里。' }}</p></div></aside>
+            </section>
+          </template>
+
           <!-- 标签二级页面 -->
           <template v-else-if="subPageGroup === 'tag'">
             <section v-if="isCategorySubPage" class="editor-layout"><div class="editor-main"><article class="panel form-panel category-basic-panel"><div class="section-title"><h2>分类信息</h2><p>分类名称用于百科分类筛选与品种归属</p></div><div class="category-name-field"><label class="form-field"><span>分类名 *</span><input v-model="subPageData.name" placeholder="例如：兔类"></label></div></article><article class="panel form-panel category-label-panel"><div class="section-title category-label-heading"><div><h2>分类标签</h2><p>为当前分类设置标签名称及对应的筛选项</p></div><button type="button" class="secondary-button" @click="addCategoryLabel"><AdminIcon name="plus" :size="15" />添加分类标签</button></div><div class="category-label-list"><section v-for="(group, groupIndex) in subPageData.groups" :key="groupIndex" class="category-label-card"><div class="category-label-card-heading"><label class="form-field"><span>标签名称 *</span><input v-model="group.name" placeholder="例如：体型分类"></label><button type="button" class="icon-danger-button" :aria-label="`删除分类标签 ${group.name || groupIndex + 1}`" @click="removeCategoryLabel(groupIndex)"><AdminIcon name="trash" :size="16" /></button></div><div class="category-option-editor"><span class="field-label">筛选项</span><div class="category-option-list"><div v-for="(option, optionIndex) in group.options" :key="optionIndex" class="category-option-input"><input v-model="group.options[optionIndex]" :aria-label="`${group.name || '分类标签'}筛选项 ${optionIndex + 1}`" placeholder="请输入筛选项"><button type="button" :aria-label="`删除筛选项 ${option || optionIndex + 1}`" @click="removeCategoryFilterOption(groupIndex, optionIndex)"><AdminIcon name="close" :size="12" /></button></div><button type="button" class="category-add-option" @click="addCategoryFilterOption(groupIndex)"><AdminIcon name="plus" :size="13" />添加筛选项</button></div></div></section><div v-if="!subPageData.groups?.length" class="category-label-empty"><AdminIcon name="tag" :size="28" /><strong>暂未添加分类标签</strong><p>点击“添加分类标签”设置名称和筛选项。</p><button type="button" class="secondary-button" @click="addCategoryLabel"><AdminIcon name="plus" :size="15" />添加分类标签</button></div></div></article></div><aside class="editor-side"><article class="panel category-overview-panel"><div class="panel-heading bordered"><h2>分类概览</h2></div><div class="category-overview-list"><p><span>分类名</span><strong>{{ subPageData.name || '未命名' }}</strong></p><p><span>分类标签</span><strong>{{ subPageData.groups?.length || 0 }} 组</strong></p><p><span>筛选项</span><strong>{{ categoryOptionCount }} 项</strong></p><p><span>关联品种</span><strong>{{ categoryBreedCount }} 个</strong></p></div></article><article class="panel category-guide-panel"><div class="panel-heading bordered"><h2>填写说明</h2></div><div class="category-guide-content"><p><strong>标签名称</strong>作为品种详情页的筛选分组展示，例如“体型分类”。</p><p><strong>筛选项</strong>是分组下可选的标签值，例如“小型犬”“中型犬”。</p></div></article><article class="panel category-operation-panel"><div class="panel-heading bordered"><h2>分类操作</h2></div><div class="category-operation-list"><button class="save-operation" type="button" @click="handleSubPagePrimary"><AdminIcon name="check" :size="16" /><span><strong>保存分类</strong></span></button><button v-if="subPage === 'category-edit'" class="danger-operation" type="button" @click="deleteCategoryFromEditor"><AdminIcon name="trash" :size="16" /><span><strong>删除分类</strong></span></button></div></article></aside></section>
@@ -1542,6 +1806,29 @@ onMounted(() => {
           <section class="panel category-workspace"><aside class="category-nav"><div class="category-nav-heading"><h2>分类列表</h2><span>共 {{ categoryManagementRows.length }} 个分类</span></div><div class="category-nav-list"><button v-for="category in categoryManagementRows" :key="category.name" type="button" class="category-nav-item" :class="{ active: selectedCategory?.name === category.name }" :aria-pressed="selectedCategory?.name === category.name" @click="selectCategory(category)"><span class="category-nav-icon"><AdminIcon name="pet" :size="19" /></span><span class="category-nav-text"><strong>{{ category.name }}</strong><small>{{ category.breedCount }} 个品种 · {{ category.groups.length }} 组标签</small></span><AdminIcon class="category-nav-arrow" name="chevron-right" :size="14" /></button><div v-if="!categoryManagementRows.length" class="category-nav-empty"><AdminIcon name="tag" :size="26" /><strong>暂无分类</strong><p>点击右上角“创建分类”添加第一个分类</p></div></div><button type="button" class="category-nav-create" @click="openSubPage('category-create')"><AdminIcon name="plus" :size="15" />创建分类</button></aside><div class="category-main"><template v-if="selectedCategory"><header class="category-main-heading"><div class="category-main-title"><span class="category-main-icon"><AdminIcon name="pet" :size="22" /></span><div><h2>{{ selectedCategory.name }}</h2><p>{{ selectedCategory.breedCount }} 个关联品种 · {{ selectedCategory.groups.length }} 组分类标签</p></div></div><div class="category-main-actions"><button type="button" class="secondary-button" @click="openSubPage('category-edit', selectedCategory)">编辑分类</button><button type="button" class="category-delete-button" @click="deleteCategory(selectedCategory)"><AdminIcon name="trash" :size="15" />删除分类</button></div></header><div class="category-main-body"><template v-if="selectedCategory.groups.length"><section v-for="group in selectedCategory.groups" :key="group.name" class="category-preview-group"><div class="category-preview-heading"><h3>{{ group.name }}</h3><span>{{ group.options.length }} 个筛选项</span></div><div class="category-preview-options"><span v-for="option in group.options" :key="`${group.name}-${option}`" class="category-preview-chip">{{ option }}</span><em v-if="!group.options.length">暂无筛选项</em></div></section></template><div v-else class="category-preview-empty"><AdminIcon name="tag" :size="28" /><strong>暂未添加分类标签</strong><p>点击“编辑分类”，为「{{ selectedCategory.name }}」添加分类标签和筛选项。</p></div></div></template><div v-else class="category-preview-empty"><AdminIcon name="pet" :size="28" /><strong>暂无分类</strong><p>点击右上角“创建分类”添加分类。</p></div></div></section>
         </template>
 
+        <!-- 轮播管理 -->
+        <template v-else-if="activeNav === '轮播管理'">
+          <section class="page-title-row"><div><h1>轮播管理</h1><p>管理用户端首页顶部轮播图的内容、顺序和发布状态</p></div><button class="primary-button" @click="openSubPage('banner-create')"><AdminIcon name="plus" :size="16" />新增轮播</button></section>
+          <section class="banner-overview-grid">
+            <article class="panel"><span>轮播总数</span><strong>{{ homeBanners.length }}</strong><small>首页轮播内容</small></article>
+            <article class="panel"><span>已发布</span><strong>{{ publishedBannerCount }}</strong><small>当前用户端可见</small></article>
+            <article class="panel"><span>建议数量</span><strong>3–5</strong><small>保持首页浏览体验</small></article>
+          </section>
+          <section class="panel banner-management-panel">
+            <div class="banner-toolbar"><label class="inline-search"><AdminIcon name="search" :size="15" /><input v-model="bannerKeyword" placeholder="搜索标题或内容说明"></label><select v-model="bannerStatus"><option>全部状态</option><option>已发布</option><option>草稿</option><option>已下架</option></select><span>共 {{ filteredHomeBanners.length }} 条内容</span></div>
+            <div class="banner-management-list">
+              <article v-for="banner in filteredHomeBanners" :key="banner.id" class="banner-management-item">
+                <div class="banner-order-control"><strong>{{ homeBanners.findIndex(item => item.id === banner.id) + 1 }}</strong><div><button type="button" aria-label="上移轮播内容" :disabled="homeBanners.findIndex(item => item.id === banner.id) === 0" @click="moveHomeBanner(homeBanners.findIndex(item => item.id === banner.id), -1)"><AdminIcon name="arrow-up" :size="14" /></button><button type="button" aria-label="下移轮播内容" :disabled="homeBanners.findIndex(item => item.id === banner.id) === homeBanners.length - 1" @click="moveHomeBanner(homeBanners.findIndex(item => item.id === banner.id), 1)"><AdminIcon name="arrow-down" :size="14" /></button></div></div>
+                <div class="banner-list-preview"><img :src="adminBannerImage(banner.image)" :alt="banner.title"><div class="banner-list-shade"></div><div><strong>{{ banner.title }}</strong><span>{{ banner.description }}</span></div></div>
+                <div class="banner-list-detail"><span>跳转路径</span><strong>{{ banner.url }}</strong><small>更新于 {{ banner.updatedAt }}</small></div>
+                <span class="state-pill" :class="banner.status">{{ banner.status }}</span>
+                <div class="banner-list-actions"><button type="button" @click="openSubPage('banner-edit', banner)"><AdminIcon name="edit" :size="14" />编辑</button><button type="button" @click="toggleHomeBannerStatus(banner)">{{ banner.status === '已发布' ? '下架' : '发布' }}</button><button type="button" class="danger-text" @click="deleteHomeBanner(banner)"><AdminIcon name="trash" :size="14" />删除</button></div>
+              </article>
+              <div v-if="!filteredHomeBanners.length" class="banner-management-empty"><AdminIcon name="image" :size="30" /><strong>没有匹配的轮播内容</strong><span>请调整筛选条件或新增轮播内容</span></div>
+            </div>
+          </section>
+        </template>
+
         <!-- 评论管理 -->
         <template v-else-if="activeNav === '评论管理'">
           <section class="page-title-row"><div><h1>评论管理</h1><p>按品种集中查看与处理用户评论</p></div><div class="header-actions"><button class="secondary-button" @click="openSubPage('comment-rules')">评论规则</button></div></section>
@@ -1560,10 +1847,16 @@ onMounted(() => {
           <section class="panel data-panel"><div class="panel-heading bordered"><h2>用户列表</h2><div class="header-actions"><label class="compact-search"><AdminIcon name="search" :size="15" /><input v-model="userListKeyword" placeholder="搜索昵称或用户编号"></label></div></div><div class="table-scroll"><table class="management-table user-table"><thead><tr><th>用户</th><th>评论</th><th>注册时间</th><th>最近活跃</th><th>操作</th></tr></thead><tbody><tr v-for="user in paginatedUsers" :key="user.id"><td><div class="admin-cell user-cell"><span>{{ user.avatar }}</span><div><strong>{{ user.name }}</strong><small>{{ user.id }}</small></div></div></td><td><button class="target-link" @click="openSubPage('user-detail', user)">{{ user.comments }}<AdminIcon name="chevron-right" :size="12" /></button></td><td>{{ user.registered }}</td><td>{{ user.active }}</td><td><div class="row-actions"><button @click="openSubPage('user-detail', user)">查看详情</button></div></td></tr><tr v-if="!filteredUsers.length"><td colspan="5"><div class="table-empty"><AdminIcon name="search" :size="22" /><strong>没有匹配的用户</strong><span>请调整搜索关键词</span></div></td></tr></tbody></table></div><div class="pagination"><span>共 {{ filteredUsers.length }} 位用户 · 第 {{ userCurrentPage }}/{{ userTotalPages }} 页</span><button :disabled="userCurrentPage === 1" aria-label="上一页" @click="changeUserPage(userCurrentPage - 1)"><AdminIcon name="chevron-left" :size="13" /></button><button v-for="page in userTotalPages" :key="page" :class="{ active: userCurrentPage === page }" @click="changeUserPage(page)">{{ page }}</button><button aria-label="下一页" :disabled="userCurrentPage === userTotalPages" @click="changeUserPage(userCurrentPage + 1)"><AdminIcon name="chevron-right" :size="13" /></button></div></section>
         </template>
 
-        <!-- 用户反馈 -->
-        <template v-else-if="activeNav === '用户反馈'">
-          <section class="page-title-row"><div><h1>用户反馈</h1></div><button class="secondary-button" @click="openSubPage('feedback-export')">导出反馈</button></section>
+        <!-- 帮助与反馈 -->
+        <template v-else-if="activeNav === '帮助与反馈'">
+          <section class="page-title-row"><div><h1>帮助与反馈</h1><p>维护用户端帮助内容，并集中处理用户提交的意见反馈</p></div><div v-if="helpAdminTab === '帮助内容'" class="header-actions"><button class="secondary-button" @click="openSubPage('help-copy-edit')"><AdminIcon name="edit" :size="15" />页面文案</button><button class="primary-button" @click="openSubPage('help-create')"><AdminIcon name="plus" :size="16" />新增问题</button></div><button v-else class="secondary-button" @click="openSubPage('feedback-export')"><AdminIcon name="download" :size="15" />导出反馈</button></section>
+          <div class="help-admin-tabs"><button v-for="tab in ['帮助内容','用户反馈']" :key="tab" :class="{ active: helpAdminTab === tab }" @click="helpAdminTab = tab"><AdminIcon :name="tab === '帮助内容' ? 'help' : 'message'" :size="16" />{{ tab }}</button></div>
+          <template v-if="helpAdminTab === '帮助内容'">
+            <section class="panel help-faq-panel"><div class="help-faq-heading"><div><h2>常见问题</h2><span>可拖动式排序由上下移动按钮完成</span></div><div><label class="compact-search"><AdminIcon name="search" :size="15" /><input v-model="helpKeyword" placeholder="搜索问题或答案"></label><select v-model="helpStatus"><option>全部状态</option><option>已发布</option><option>草稿</option><option>已下架</option></select></div></div><div class="help-faq-list"><article v-for="faq in filteredHelpFaqs" :key="faq.id" class="help-faq-item"><div class="help-faq-order"><strong>{{ helpFaqs.findIndex(item => item.id === faq.id) + 1 }}</strong><div><button type="button" aria-label="上移常见问题" :disabled="helpFaqs.findIndex(item => item.id === faq.id) === 0" @click="moveHelpFaq(helpFaqs.findIndex(item => item.id === faq.id), -1)"><AdminIcon name="arrow-up" :size="14" /></button><button type="button" aria-label="下移常见问题" :disabled="helpFaqs.findIndex(item => item.id === faq.id) === helpFaqs.length - 1" @click="moveHelpFaq(helpFaqs.findIndex(item => item.id === faq.id), 1)"><AdminIcon name="arrow-down" :size="14" /></button></div></div><span class="help-category-tag">{{ faq.category }}</span><div class="help-faq-copy"><strong>{{ faq.question }}</strong><p>{{ faq.answer }}</p><small>更新于 {{ faq.updatedAt }}</small></div><span class="state-pill" :class="faq.status">{{ faq.status }}</span><div class="help-faq-actions"><button @click="openSubPage('help-edit', faq)"><AdminIcon name="edit" :size="14" />编辑</button><button @click="toggleHelpFaqStatus(faq)">{{ faq.status === '已发布' ? '下架' : '发布' }}</button><button class="danger-text" @click="deleteHelpFaq(faq)"><AdminIcon name="trash" :size="14" />删除</button></div></article><div v-if="!filteredHelpFaqs.length" class="help-faq-empty"><AdminIcon name="help" :size="30" /><strong>没有匹配的常见问题</strong><span>请调整筛选条件或新增问题</span></div></div></section>
+          </template>
+          <template v-else>
           <section class="feedback-layout"><div class="feedback-main"><section class="panel data-panel"><div class="tab-filter"><div><button v-for="tab in ['全部反馈','待处理','处理中','已解决','已关闭']" :key="tab" :class="{active:feedbackTab===tab}" @click="feedbackTab=tab">{{ tab }}<span v-if="tab === '待处理'">9</span><span v-else-if="tab === '处理中'">6</span></button></div><label class="compact-search"><AdminIcon name="search" :size="15" /><input v-model="feedbackKeyword" placeholder="搜索编号或反馈内容"></label></div><div class="feedback-list"><button v-for="feedback in filteredFeedbacks" :key="feedback.id" class="feedback-item" @click="openSubPage('feedback-detail', feedback)"><span class="feedback-type" :class="feedback.type">{{ feedback.type }}</span><div><strong>{{ feedback.content }}</strong><p>{{ feedback.id }} · {{ feedback.user }} · {{ feedback.time }}</p></div><span class="owner">负责人：{{ feedback.owner }}</span><span class="state-pill" :class="feedback.status">{{ feedback.status }}</span><AdminIcon class="task-arrow" name="chevron-right" :size="17" /></button><div v-if="!filteredFeedbacks.length" class="list-empty">没有符合条件的用户反馈</div></div></section></div><aside class="panel feedback-side"><div class="panel-heading bordered"><h2>反馈类型分布</h2></div><div class="ring-small"><EChart :option="feedbackTypeOption" height="150px" /></div><div class="distribution-list"><p><i class="orange"/><span>内容纠错</span><strong>38%</strong></p><p><i class="green"/><span>功能建议</span><strong>29%</strong></p><p><i class="purple"/><span>使用问题</span><strong>21%</strong></p><p><i class="gray"/><span>其他</span><strong>12%</strong></p></div><div class="service-note"><span>平均首次响应</span><strong>26 分钟</strong><small>优于上月 8 分钟</small></div></aside></section>
+          </template>
         </template>
 
 
@@ -1577,8 +1870,28 @@ onMounted(() => {
 
         <!-- 管理员 -->
         <template v-else>
-          <section class="page-title-row"><div><h1>管理员</h1></div><button class="secondary-button" @click="openSubPage('admin-edit', admins[0])"><AdminIcon name="edit" :size="15" />编辑资料</button></section>
-          <section class="panel single-admin-panel"><div class="single-admin-profile"><span class="single-admin-avatar"><AdminIcon name="user" :size="24" /></span><div><h2>当前管理员</h2><p>{{ admins[0].account }}</p></div><span class="state-pill 正常">正常</span></div><div class="single-admin-details"><div><span>姓名</span><strong>{{ admins[0].name }}</strong></div><div><span>登录账号</span><strong>{{ admins[0].account }}</strong></div><div><span>最后登录</span><strong>{{ admins[0].lastLogin }}</strong></div><div><span>账号类型</span><strong>唯一管理员</strong></div></div><div class="single-admin-security"><span><AdminIcon name="shield" :size="20" /></span><div><strong>账号安全</strong><p>建议定期修改密码，并妥善保管管理员登录凭证。</p></div><button class="secondary-button" @click="handlePrototypeAction('修改密码功能已打开')">修改密码</button></div></section>
+          <section class="page-title-row admin-page-heading"><div><h1>管理员</h1><p>管理当前后台账号的资料与安全设置</p></div><button class="secondary-button" @click="openSubPage('admin-edit', admins[0])"><AdminIcon name="edit" :size="15" />编辑资料</button></section>
+          <section class="admin-account-layout">
+            <article class="panel single-admin-panel">
+              <div class="single-admin-profile">
+                <span class="single-admin-avatar"><AdminIcon name="user" :size="30" /></span>
+                <div class="single-admin-profile-copy"><span>当前管理员</span><h2>{{ admins[0].name }}</h2><p>{{ admins[0].account }}</p></div>
+                <span class="state-pill 正常"><AdminIcon name="check" :size="12" />账号正常</span>
+              </div>
+              <dl class="single-admin-details">
+                <div><dt>姓名</dt><dd>{{ admins[0].name }}</dd></div>
+                <div><dt>登录账号</dt><dd>{{ admins[0].account }}</dd></div>
+                <div><dt>账号类型</dt><dd>唯一管理员</dd></div>
+                <div><dt>最后登录</dt><dd>{{ admins[0].lastLogin }}</dd></div>
+              </dl>
+            </article>
+            <aside class="panel single-admin-security">
+              <div class="single-admin-security-heading"><span><AdminIcon name="shield" :size="22" /></span><div><small>安全设置</small><h2>账号安全</h2></div></div>
+              <p>定期更新登录密码，并妥善保管管理员凭证，可降低账号风险。</p>
+              <div class="single-admin-security-status"><span><AdminIcon name="check" :size="15" /></span><div><strong>当前状态良好</strong><small>暂未发现异常登录活动</small></div></div>
+              <button class="secondary-button" @click="handlePrototypeAction('修改密码功能已打开')"><AdminIcon name="shield" :size="15" />修改登录密码</button>
+            </aside>
+          </section>
         </template>
       </main>
     </section>
